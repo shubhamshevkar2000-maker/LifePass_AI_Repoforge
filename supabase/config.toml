@@ -1,0 +1,26 @@
+# LifePass AI — Supabase Project CLI Configuration Foundation
+
+project_id = "lifepass-ai-dev"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+
+[db]
+port = 54322
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+
+[auth.sms]
+enable_signup = true
+double_confirm_changes = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"

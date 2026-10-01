@@ -1,0 +1,21 @@
+{
+  "name": "lifepass-ai-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LifePass AI — Unified Life-Stage Digital Identity & Record Network Monorepo",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile:start": "npm run --prefix apps/mobile start",
+    "mobile:check": "npm run --prefix apps/mobile check",
+    "web:dev": "npm run --prefix apps/web dev",
+    "web:build": "npm run --prefix apps/web build",
+    "web:check": "npm run --prefix apps/web check",
+    "shared:build": "npm run --prefix packages/shared build",
+    "check:all": "npm run shared:build && npm run mobile:check && npm run web:check"
+  },
+  "author": "LifePass AI Team",
+  "license": "UNLICENSED"
+}
