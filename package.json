@@ -17,5 +17,8 @@
     "check:all": "npm run shared:build && npm run mobile:check && npm run web:check"
   },
   "author": "LifePass AI Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "supabase": "^2.119.0"
+  }
 }

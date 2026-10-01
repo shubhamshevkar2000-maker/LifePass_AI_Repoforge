@@ -1,52 +1,73 @@
-/**
- * LifePass AI — Institution Web Portal Foundation
- *
- * PHASE 0.1 BASELINE ONLY
- * Institution authentication, request workflows, and consented package viewing will be
- * implemented in subsequent phases according to IMPLEMENTATION_PLAN.md.
- */
+import React from 'react';
+import { InstitutionAuthProvider, useInstitutionAuth } from './context/InstitutionAuthContext';
+import { InstitutionLoginView } from './components/InstitutionLoginView';
+import { AccessDeniedView } from './components/AccessDeniedView';
+import { InstitutionDashboardFoundation } from './components/InstitutionDashboardFoundation';
+
+const WebRouter: React.FC = () => {
+  const { session, isMemberVerified, isLoading } = useInstitutionAuth();
+
+  if (isLoading) {
+    return (
+      <div style={styles.centerContainer}>
+        <div style={styles.spinner} />
+        <p style={styles.loadingText}>Verifying Institution Credentials...</p>
+      </div>
+    );
+  }
+
+  // Unauthenticated -> Show Phone OTP login
+  if (!session) {
+    return (
+      <div style={styles.centerContainer}>
+        <InstitutionLoginView />
+      </div>
+    );
+  }
+
+  // Authenticated BUT not an active member in public.institution_members -> Access Denied
+  if (!isMemberVerified) {
+    return (
+      <div style={styles.centerContainer}>
+        <AccessDeniedView />
+      </div>
+    );
+  }
+
+  // Authenticated and verified active institution member -> Show Foundation Dashboard
+  return <InstitutionDashboardFoundation />;
+};
+
 export default function App() {
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
-    }}>
-      <div style={{
-        backgroundColor: '#111827',
-        border: '1px solid #1F2937',
-        borderRadius: '1rem',
-        padding: '2rem',
-        maxWidth: '480px',
-        width: '100%',
-        textAlign: 'center'
-      }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: '#F9FAFB' }}>
-          LifePass AI Institution Portal
-        </h1>
-        <p style={{ fontSize: '0.875rem', color: '#9CA3AF', margin: '0 0 1.5rem 0' }}>
-          Unified Life-Stage Digital Identity & Verification Network
-        </p>
-        <div style={{
-          display: 'inline-block',
-          backgroundColor: '#1E293B',
-          border: '1px solid #334155',
-          borderRadius: '0.5rem',
-          padding: '0.375rem 0.75rem',
-          fontSize: '0.75rem',
-          fontWeight: 600,
-          color: '#38BDF8',
-          margin: '0 0 1.5rem 0'
-        }}>
-          Phase 0.1 — Institution Web Foundation Baseline
-        </div>
-        <p style={{ fontSize: '0.875rem', color: '#D1D5DB', lineHeight: '1.5', margin: 0 }}>
-          The institution web portal workspace foundation has been initialized.
-          Institution workflows, request management, and consented record packages will be implemented in Phase 8.
-        </p>
-      </div>
-    </div>
+    <InstitutionAuthProvider>
+      <WebRouter />
+    </InstitutionAuthProvider>
   );
 }
+
+const styles: Record<string, React.CSSProperties> = {
+  centerContainer: {
+    minHeight: '100vh',
+    backgroundColor: '#090D16',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1.5rem',
+    boxSizing: 'border-box',
+  },
+  spinner: {
+    width: '2.5rem',
+    height: '2.5rem',
+    border: '3px solid #1F2937',
+    borderTopColor: '#38BDF8',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  loadingText: {
+    marginTop: '1rem',
+    color: '#9CA3AF',
+    fontSize: '0.875rem',
+  },
+};
