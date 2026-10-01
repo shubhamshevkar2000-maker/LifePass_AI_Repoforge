@@ -50,9 +50,47 @@ LifePass_AI_RepoForge/
 
 ## Current Status
 
-- **Current Phase:** Phase 0.1 — Monorepo / Workspace Initialization & Environment Foundation
-- **Phase Status:** VERIFIED
-- **Business Logic Status:** NOT STARTED (Reserved for Phase 1+)
+- **Baseline Phase:** Phase 1 — Authentication + Database Foundation
+- **Phase Status:** VERIFIED & PUSHED TO MAIN (Commit `1f86c36`)
+- **Shared Baseline:** All team members pull `main` to branch into their respective workstreams.
+
+---
+
+## Team Workstreams & Ownership Model
+
+The project has transitioned to parallel, independent workstreams built upon the Phase 1 shared baseline:
+
+### Workstream 1: Backend + Database + Security
+- **Owner:** Nidhi
+- **Scope:** Supabase PostgreSQL, migrations, auth integration, RLS, storage/security, backend APIs, record management, requirement data, deterministic matching/readiness logic, access requests, consent, permission management, audit events.
+- **Rule:** Database changes must be version-controlled strictly through Supabase migrations.
+
+### Workstream 2: AI + Document Intelligence
+- **Owner:** AI Teammate
+- **Scope:** Intent understanding, life-stage/task understanding, requirement retrieval/RAG, OCR/document processing, classification, metadata extraction, AI orchestration, structured outputs, prompt-injection defense.
+- **Rule:** Must follow `AI_AGENT_SPEC.md`; AI never makes authoritative verification, consent, or deterministic readiness decisions.
+
+### Workstream 3: Client Applications (Mobile + Web)
+- **Owner:** Frontend Teammate
+- **Scope:** Citizen Mobile App (React Native/Expo) and Institution Web Portal (React/Vite).
+- **Rule:** Both clients share the same backend, database, auth model, and API contracts. Follow `FRONTEND_SPEC.md`.
+
+### Workstream 4: Integration + QA + DevOps
+- **Owner:** Integration/QA Teammate
+- **Scope:** Connect clients to backend, backend to AI, end-to-end integration tests, RLS verification, Docker environment management, regression testing.
+
+### Git Branching Model
+```text
+main (Phase 1 Baseline)
+ ├── feature/backend  (Workstream 1: Nidhi)
+ ├── feature/ai       (Workstream 2: AI Teammate)
+ ├── feature/client   (Workstream 3: Frontend Teammate)
+ └── feature/qa       (Workstream 4: Integration/QA)
+```
+- Pull latest `main` baseline before starting.
+- Create feature branches per task/workstream.
+- Open PRs with automated tests passing.
+- The 13 Markdown specifications in `docs/` remain the single source of truth.
 
 ---
 

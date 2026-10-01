@@ -534,3 +534,29 @@ Establish real Supabase Auth phone-number OTP authentication, session persistenc
 **Known Blockers:** Live carrier SMS OTP delivery in a hosted acceptance environment requires provisioning live Supabase and SMS provider credentials. Local GoTrue returns `phone_provider_disabled`.
 
 **First Recommended Action:** Begin Phase 2 implementation for document storage configuration and `records` table migration upon explicit user instruction.
+
+---
+
+## 28. Team Workstreams & Distributed Development Architecture
+
+### 1. Phase 1 Shared Baseline
+Phase 1 implementation, migrations, RLS policies, automated runtime verification (35 tests passing), and frontend type checks are complete and committed to `main` (`1f86c36`). This pushed commit represents the immutable foundation for all team members.
+
+### 2. Workstream Breakdown & Ownership
+
+| Workstream | Domain | Owner | Scope & Key Responsibilities | Architectural Constraints |
+| :--- | :--- | :--- | :--- | :--- |
+| **Workstream 1** | **Backend + Database + Security** | **Nidhi** | Supabase PostgreSQL migrations, RLS policies, auth integration, storage security, backend APIs, record management, requirement profiles, deterministic matching logic, access requests, consent, permission management, append-only audit events. | Database changes must strictly be version-controlled via Supabase migrations. Prohibited from adding second DBs or changing schema outside migration files. |
+| **Workstream 2** | **AI + Document Intelligence** | **AI Teammate** | Intent understanding, life-stage task categorization, requirement retrieval/RAG, OCR & document processing, document classification, structured metadata extraction, AI orchestration, natural language explanation, prompt-injection defense. | Strictly follow `AI_AGENT_SPEC.md`. AI can NEVER set verification status, grant access, approve applications, or hallucinate external integrations. |
+| **Workstream 3** | **Client Applications (Mobile & Web)** | **Frontend Teammate** | Citizen Mobile App (React Native/Expo) and Institution Web Portal (React/Vite). Shared UX contracts, design tokens, auth session management, record flows, consent cards, and status badges. | Both clients share the SAME backend, APIs, auth model, and database. Follow `FRONTEND_SPEC.md`. Institution portal is not a separate backend. |
+| **Workstream 4** | **Integration + QA + DevOps** | **Integration/QA Teammate** | End-to-end integration across frontend, backend, and AI. Multi-identity RLS testing, carrier SMS/auth acceptance, consent revocation testing, Docker/environment orchestration, demo environment readiness, and regression suites. | Continuous integration support across all phases rather than post-development handoff. |
+
+### 3. Workstream Collaboration & Ownership Rules
+1. **Ownership Integrity:** Each owner owns their designated workstream. No teammate directly modifies another's subsystem. Interface requests (e.g. AI requiring a new DB field) must be proposed to the owner (Nidhi), implemented as a migration, and pulled by the consumer.
+2. **Specification Source of Truth:** The 13 approved Markdown specifications in `docs/` remain the frozen source of truth. No individual workstream may redefine product flow without team consensus and prior specification updates.
+3. **Phases as Product Milestones:** Phases are capabilities, not sequential code blockers. Workstreams execute in parallel within each milestone (e.g., Phase 2: Nidhi builds `records` schema & storage; AI teammate builds OCR/classification; Frontend builds upload & record cards; QA connects upload to storage).
+4. **Git Branching Strategy:**
+   - Base branch: `main` (Always pulled fresh)
+   - Workstream branches: `feature/backend`, `feature/ai`, `feature/client`, `feature/qa`
+   - Merge discipline: Small feature PRs with automated tests passing against the shared baseline.
+
