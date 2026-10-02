@@ -6,7 +6,7 @@ import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 
 export const InstitutionLoginView: React.FC = () => {
-  const { login, signUp, error, clearError } = useInstitutionAuth();
+  const { login, signUp, error, clearError, setSelectedPortal } = useInstitutionAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -128,6 +128,25 @@ export const InstitutionLoginView: React.FC = () => {
       }}
       padding="lg"
     >
+      {/* Back to landing */}
+      <button
+        type="button"
+        onClick={() => setSelectedPortal('landing')}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#0EA5E9',
+          fontSize: '0.8125rem',
+          cursor: 'pointer',
+          padding: 0,
+          marginBottom: '1rem',
+          textAlign: 'left',
+          display: 'inline-block',
+        }}
+      >
+        ← Back to Experience Selection
+      </button>
+
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <Badge variant="info" size="sm" style={{ marginBottom: '0.75rem' }}>

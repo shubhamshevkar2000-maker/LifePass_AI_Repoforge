@@ -1,7 +1,7 @@
 # LifePass — Master Specification
 
-**Version:** 1.1  
-**Status:** FROZEN BASELINE  
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE  
 **Product:** LifePass AI — Unified Life-Stage Digital Identity & Record Network
 
 ## Purpose
@@ -21,40 +21,47 @@ Do not independently redesign architecture, replace technologies, add major feat
 5. `DATABASE_SCHEMA.md` — PostgreSQL/Supabase schema and relationships.
 6. `DEMO_FLOW.md` — exact end-to-end demonstration flows.
 7. `DOCUMENT_PIPELINE.md` — document intake and processing.
-8. `FRONTEND_SPEC.md` — user mobile app and institution web portal.
+8. `FRONTEND_SPEC.md` — individual and institution responsive web applications.
 9. `IMPLEMENTATION_PLAN.md` — build order, milestones and ownership.
 10. `PRODUCT_SPEC.md` — product scope, users, features and non-goals.
 11. `SECURITY_CONSENT.md` — security, authorization, consent and audit rules.
 12. `TESTING_QA.md` — acceptance criteria, tests and failure cases.
 
-Authentication amendment:
-- Supabase Auth phone-number OTP is the required login verification mechanism.
-- OTP delivery must use an actually configured SMS provider; frontend-only/mock OTP is not acceptable.
-- OTP codes are verified by Supabase Auth and are not stored in the LifePass application database.
+### Two-Sided Platform & Authentication Amendment (v1.2)
+- **Two-Sided Architecture:** LifePass AI serves two primary user types:
+  1. **Individual / Citizen:** Personal record owner managing life tasks and consent. Implemented as a **responsive React web application** (`apps/web/**`).
+  2. **Institution:** Verifying organizations requesting consented records. Implemented as a **responsive React web portal** (`apps/web/**`).
+- **Mobile Target Reframe:** The original native mobile app (`apps/mobile/**`) is designated as a **legacy prototype reference**. All active frontend development is consolidated in `apps/web/**`.
+- **Authentication Model:** Login operates via **Username and Password** for both Individual and Institution users. Phone OTP login and Email-based login are retired.
+- **Consent OTP Distinction:** Temporary access OTP / authorization codes used during institutional record sharing remain part of the consent/security workflow and are distinct from login authentication.
 
 ## Technology baseline
 
-### Citizen application
-- React Native
-- Expo
+### Individual application
+- React
 - TypeScript
+- Responsive Web application (`apps/web/**`)
+- App-like mobile-friendly & desktop layouts
 
 ### Institution application
 - React
 - TypeScript
-- Web application
-- Desktop-first responsive interface
+- Responsive Web application (`apps/web/**`)
+- Desktop & tablet optimized administrative interface
+
+### Legacy prototype (Non-active)
+- React Native / Expo (`apps/mobile/**`) — preserved as historical reference; receives no further feature work.
 
 ### Platform/backend
 - Supabase
 - PostgreSQL
-- Supabase Auth (phone-number OTP for login verification)
+- Supabase Auth (Username/Password authentication model)
 - Supabase Storage
 - Row Level Security (RLS)
 - Supabase Edge Functions where suitable
-- Python AI/document-processing service where Python libraries or model workflows are required
+- Python AI/document-processing service (FastAPI) for OCR, embeddings, and NLP
 
-Supabase officially supports Expo/React Native and provides Postgres, Auth, Storage, RLS and Edge Functions. See the official documentation before implementation.
+During frontend development, the web application runs in an isolated prototype mode using a clean auth adapter with zero Supabase credential requirements. Real backend integration occurs in later cross-workstream integration phases.
 
 ## Core product boundary
 
@@ -142,27 +149,22 @@ For an architectural/product change:
 
 This repository defines the final baseline. The specifications describe what must be built; they do not imply that every component has already been implemented.
 
-## OTP authentication requirement
+## Authentication & Access Control Architecture
 
-LifePass login must use real phone-number OTP authentication through Supabase Auth.
+LifePass uses **Username and Password** authentication across both Individual and Institution web applications.
 
-Required flow:
+### Login Flow:
 ```text
-Enter phone number
+Enter Username & Password
     ↓
-Request OTP
+Auth Adapter / Credential Verification
     ↓
-Actual SMS delivered by configured SMS provider
+Authenticated Session Established
     ↓
-Enter OTP
-    ↓
-Supabase Auth verifies OTP
-    ↓
-Authenticated session
-    ↓
-LifePass application
+LifePass Responsive Web (Individual Dashboard or Institution Portal)
 ```
 
-The client must not implement its own OTP generation, persistence, or verification authority. OTP values must not be stored in PostgreSQL, AsyncStorage, localStorage, or other client persistence. Provider/Auth-side expiration and abuse controls must be respected.
-
-A demo/development environment may use provider-supported test mechanisms only when clearly documented; the real acceptance path requires an actual SMS OTP flow.
+- **Login Credentials:** Users and institution officers authenticate using clean, deterministic username and password credentials. Neither Phone OTP login nor Email-based login is used.
+- **Frontend Development Mode:** In the isolated frontend workstream, authentication is handled via a client-side `IAuthAdapter` (`MockAuthAdapter`) storing session display metadata in `localStorage` without plaintext passwords and requiring no live backend credentials.
+- **Production Integration:** During final integration, `SupabaseAuthAdapter` will connect to Supabase Auth without modifying the UI components.
+- **Consent OTP Distinction:** The separate temporary-access verification / OTP mechanism for authorizing institutional access to personal records remains part of the consent security boundary and is not affected by the login authentication model.

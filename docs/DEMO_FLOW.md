@@ -1,27 +1,25 @@
 # LifePass — Demo Flow
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. Demo objective
 
 Demonstrate the core differentiation:
 
-**LifePass understands a life-stage task, identifies requirements, maps existing records, finds gaps, and enables consented structured sharing.**
+**LifePass understands a life-stage task, identifies requirements, maps existing records, finds gaps, and enables consented structured sharing across a two-sided platform.**
 
 Do not make the demo about document storage alone.
 
-## 1.5 Login authentication
+## 1.5 Landing Screen & Authentication
 
-The demo begins with the real LifePass login flow:
-
-1. User enters a phone number.
-2. Supabase Auth sends an actual OTP through the configured SMS provider.
-3. User enters the received OTP.
-4. Supabase Auth verifies it.
-5. User enters the authenticated LifePass app.
-
-Do not present a fake OTP, hard-coded OTP, or UI-only “OTP sent” state as a successful authentication flow.
+The demo begins at the two-sided Landing entry screen:
+1. Demonstrator displays the landing screen highlighting both user types:
+   - **Individual:** *"Personal Records & Life Tasks"* → "Continue as Individual"
+   - **Institution:** *"Institution Access Portal"* → "Continue as Institution"
+2. Demonstrator selects **Individual** and enters demo credentials (username and password) or registers a new individual account.
+3. The authenticated Individual Responsive Web Dashboard opens immediately with zero configuration warnings.
+4. Demonstrator exhibits the primary polished scenario: **University / College Admission**.
 
 ## 2. Demo account
 

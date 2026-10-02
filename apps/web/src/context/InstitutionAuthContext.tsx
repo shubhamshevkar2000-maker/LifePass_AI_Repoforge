@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { authAdapter, MockUserSession, RegisterCredentials } from '../services/authAdapter';
+import {
+  authAdapter,
+  MockUserSession,
+  RegisterCredentials,
+  IndividualRegisterCredentials,
+  UserType,
+} from '../services/authAdapter';
 import { Institution, InstitutionMember } from '@lifepass/shared';
 
 export interface InstitutionMembershipWithDetails extends InstitutionMember {
@@ -14,8 +20,11 @@ export interface InstitutionAuthContextType {
   isLoading: boolean;
   error: string | null;
   isMemberVerified: boolean;
-  login: (username: string, password?: string) => Promise<{ success: boolean; error?: string }>;
+  selectedPortal: 'landing' | 'individual' | 'institution';
+  setSelectedPortal: (portal: 'landing' | 'individual' | 'institution') => void;
+  login: (username: string, password?: string, userType?: UserType) => Promise<{ success: boolean; error?: string }>;
   signUp: (data: RegisterCredentials) => Promise<{ success: boolean; error?: string }>;
+  signUpIndividual: (data: IndividualRegisterCredentials) => Promise<{ success: boolean; error?: string }>;
   refreshMembership: () => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
@@ -31,29 +40,36 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isMemberVerified, setIsMemberVerified] = useState<boolean>(false);
+  const [selectedPortal, setSelectedPortal] = useState<'landing' | 'individual' | 'institution'>('landing');
 
   // Derives institution membership from current session
   const buildMembershipFromUser = (currentUser: MockUserSession) => {
-    const membership: InstitutionMembershipWithDetails = {
-      id: `mem-${currentUser.userId}`,
-      institution_id: `inst-${currentUser.userId}`,
-      user_id: currentUser.userId,
-      role: currentUser.role || 'OFFICER',
-      status: 'active',
-      created_at: new Date().toISOString(),
-      institution: {
-        id: `inst-${currentUser.userId}`,
-        name: currentUser.institutionName || 'Verified Institution',
-        type: currentUser.institutionType || 'bank',
+    if (currentUser.userType === 'INSTITUTION') {
+      const membership: InstitutionMembershipWithDetails = {
+        id: `mem-${currentUser.userId}`,
+        institution_id: `inst-${currentUser.userId}`,
+        user_id: currentUser.userId,
+        role: currentUser.role || 'OFFICER',
         status: 'active',
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    };
+        institution: {
+          id: `inst-${currentUser.userId}`,
+          name: currentUser.institutionName || 'Apex National Bank',
+          type: currentUser.institutionType || 'bank',
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      };
 
-    setActiveMembership(membership);
-    setAllMemberships([membership]);
-    setIsMemberVerified(true);
+      setActiveMembership(membership);
+      setAllMemberships([membership]);
+      setIsMemberVerified(true);
+    } else {
+      setActiveMembership(null);
+      setAllMemberships([]);
+      setIsMemberVerified(true);
+    }
   };
 
   useEffect(() => {
@@ -66,10 +82,14 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
           setUser(existing);
           setSession({ user: existing });
           buildMembershipFromUser(existing);
+          setSelectedPortal(existing.userType === 'INDIVIDUAL' ? 'individual' : 'institution');
+        } else if (mounted) {
+          setSelectedPortal('landing');
         }
       } catch (err: any) {
         if (mounted) {
           setError(err?.message || 'Failed to restore session');
+          setSelectedPortal('landing');
         }
       } finally {
         if (mounted) {
@@ -85,10 +105,14 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
     };
   }, []);
 
-  const login = async (username: string, password?: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (
+    username: string,
+    password?: string,
+    userType: UserType = 'INSTITUTION'
+  ): Promise<{ success: boolean; error?: string }> => {
     setError(null);
     try {
-      const res = await authAdapter.login({ username, password });
+      const res = await authAdapter.login({ username, password, userType });
       if (!res.success || !res.user) {
         setError(res.error || 'Invalid credentials');
         return { success: false, error: res.error || 'Invalid credentials' };
@@ -97,6 +121,7 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
       setUser(res.user);
       setSession({ user: res.user });
       buildMembershipFromUser(res.user);
+      setSelectedPortal(res.user.userType === 'INDIVIDUAL' ? 'individual' : 'institution');
       return { success: true };
     } catch (err: any) {
       const msg = err?.message || 'Login failed';
@@ -117,9 +142,33 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
       setUser(res.user);
       setSession({ user: res.user });
       buildMembershipFromUser(res.user);
+      setSelectedPortal('institution');
       return { success: true };
     } catch (err: any) {
       const msg = err?.message || 'Registration failed';
+      setError(msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  const signUpIndividual = async (
+    data: IndividualRegisterCredentials
+  ): Promise<{ success: boolean; error?: string }> => {
+    setError(null);
+    try {
+      const res = await authAdapter.registerIndividual(data);
+      if (!res.success || !res.user) {
+        setError(res.error || 'Individual registration failed');
+        return { success: false, error: res.error || 'Individual registration failed' };
+      }
+
+      setUser(res.user);
+      setSession({ user: res.user });
+      buildMembershipFromUser(res.user);
+      setSelectedPortal('individual');
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Individual registration failed';
       setError(msg);
       return { success: false, error: msg };
     }
@@ -141,6 +190,7 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
       setAllMemberships([]);
       setIsMemberVerified(false);
       setError(null);
+      setSelectedPortal('landing');
     }
   };
 
@@ -156,8 +206,11 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
         isLoading,
         error,
         isMemberVerified,
+        selectedPortal,
+        setSelectedPortal,
         login,
         signUp,
+        signUpIndividual,
         refreshMembership,
         signOut,
         clearError,

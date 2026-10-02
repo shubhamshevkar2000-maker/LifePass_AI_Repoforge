@@ -1,7 +1,7 @@
 # LifePass — Security & Consent
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. Security principles
 
@@ -18,28 +18,31 @@
 
 ## 2. Authentication
 
-Supabase Auth manages authentication.
+Supabase Auth manages authentication (isolated via frontend adapter during parallel development).
 
 The application must distinguish:
-- citizen/user
+- citizen/individual user
 - institution member
 - authorized service/admin role
 
 Role claims must not be trusted merely because the frontend sends them.
 
-## 2.5 Phone OTP security
+## 2.5 Credential & Session Security
 
-Supabase Auth manages phone-number OTP authentication.
+Authentication is based on a **Username and Password** model.
 
 Security requirements:
-- OTP is delivered via an actually configured SMS provider.
-- OTP verification is performed by Supabase Auth, not by frontend business logic.
-- LifePass does not store OTP codes in PostgreSQL, client storage, or logs.
-- OTP/session details must not be exposed in application responses or audit events.
-- Provider/Auth expiration, resend limits, and anti-abuse controls must be respected.
-- Successful OTP verification creates an authenticated session but does not bypass RLS, record ownership, institution membership, or consent.
+- Passwords are securely hashed by the authentication service (e.g. bcrypt/argon2 via Supabase Auth); no plaintext passwords in database or logs.
+- The web client must never store plaintext passwords in `localStorage`, memory caches, or state.
+- Successful login creates an authenticated session but does not bypass RLS, record ownership, institution membership, or consent.
+- Rate-limiting, brute-force protection, and session timeouts must be respected.
 
-The client must never contain SMS-provider secrets or privileged Supabase service credentials.
+### Temporary Access & Consent OTP Boundary
+The separate temporary-access verification / OTP mechanism for granting institutional access to personal records is distinct from login authentication:
+- Scoped strictly to the explicitly selected records and stated workflow purpose.
+- Time-limited with enforced expiration.
+- Revocable by the individual data owner.
+- Every consent grant, denial, or access is recorded in immutable audit logs.
 
 ## 3. Row Level Security
 

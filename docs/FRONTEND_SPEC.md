@@ -1,57 +1,98 @@
 # LifePass — Frontend Specification
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
-# Part 0 — Authentication / Phone OTP
+# Part 0 — Landing & Authentication
 
-The login experience must support real phone-number OTP authentication.
+## 1. Landing & Role Selection Screen
+The entry point of the LifePass web application exposes the two-sided nature of the platform:
+- **INDIVIDUAL PATH:**
+  - Title: *"Personal Records & Life Tasks"*
+  - Description: *"Manage your records, understand what you need, and share only what you approve."*
+  - Action: **"Continue as Individual"**
+- **INSTITUTION PATH:**
+  - Title: *"Institution Access Portal"*
+  - Description: *"Request and access authorized records from applicants through LifePass."*
+  - Action: **"Continue as Institution"**
 
-### Required screens/states
-- Enter phone number
-- Sending OTP/loading
-- OTP verification input
-- Resend OTP state according to Auth/provider limits
-- Invalid/expired OTP error
-- Successful verification/loading session
-- Authenticated app entry
+## 2. Authentication Model (Username & Password)
+Both sides use straightforward, secure username/password credentials. Phone OTP login and Email-based login are retired.
 
-The UI must never imply successful authentication before Supabase Auth confirms OTP verification. The client must not contain privileged secrets or implement its own OTP verification logic.
+### Individual Authentication:
+- **Login:**
+  - Portal Username
+  - Password
+- **Registration:**
+  - Full Name
+  - Official Contact Phone / Email
+  - Identity / Account Details
+  - Portal Username
+  - Password & Confirm Password
 
-# Part A — User Mobile App
+### Institution Authentication:
+- **Login:**
+  - Portal Username
+  - Password
+- **Registration:**
+  - Officer Full Name
+  - Institution Name
+  - Institution Type (Bank, University, Government Agency, Healthcare, Other)
+  - Official Contact Phone
+  - Portal Username
+  - Password & Confirm Password
 
-## 1. Technology
-- React Native
-- Expo
+### Frontend Development Mode:
+- The web application executes without live Supabase credentials (`VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`) or backend network dependencies.
+- Authentication state is isolated within a client-side `IAuthAdapter` (`MockAuthAdapter`).
+- Non-sensitive session display data is saved to `localStorage` (`lifepass_mock_session`) so reloads persist the session without storing plaintext passwords.
+- No Supabase configuration warnings or fake backend claims are rendered.
+
+### Consent OTP Distinction:
+- Login authentication operates via username and password.
+- The separate temporary-access verification / OTP mechanism for authorizing institutional access to personal records remains part of the consent/security workflow and is distinct from login authentication.
+
+# Part A — Individual Responsive Web Application
+
+*(Active Target: `apps/web/**`. Note: The original native mobile app in `apps/mobile/**` is preserved as a legacy prototype reference; all active user feature work is implemented as responsive web).*
+
+## 1. Technology & Design System
+- React
 - TypeScript
+- Responsive Web CSS (`apps/web/**`)
+- App-like layout adapting seamlessly to mobile web browsers, tablets, and desktop displays.
+- Shared UI primitives: `Button`, `Input`, `Card`, `Badge`, `Modal`, `Table`, `Spinner`.
 
-## 2. Navigation
-
+## 2. Navigation Architecture
 ```text
-Auth
+Landing Screen (Role Selection)
   ↓
-Home
- ├── My Records
- ├── AI Assistant
- ├── Requests
- ├── Notifications
- └── Profile/Settings
+Individual Auth (Login / Register)
+  ↓
+Individual Web Shell
+ ├── Dashboard (Home & AI Task Entry)
+ ├── Record Vault (My Records & Uploads)
+ ├── AI Assistant & Requirements
+ ├── Access Requests & Consent
+ ├── Active Permissions & Audit
+ └── Profile / Settings
 ```
 
-## 3. Home
+## 3. Individual Dashboard
+Primary entry screen for the record owner:
+- **Greeting & Identity:** Personalized welcome with user handle and verified status indicator.
+- **AI Task Input (Primary Interaction):**
+  - Prompt: **"What are you trying to accomplish?"**
+  - Input field with quick action prompts.
+- **Suggested Life-Stage Tasks:**
+  - **College Admission** *(Primary Hackathon Scenario)*
+  - Job Application
+  - Education Loan Application
+  - Hospital Admission
+- **Record & Verification Summary:** Quick count of active records, pending extractions, and verification statuses.
+- **Active Permissions & Recent Activity:** List of institutions currently holding authorized access and recent audit events.
 
-Show:
-- greeting
-- current requests
-- record categories
-- AI task entry
-- readiness/action cards where applicable
-
-Primary CTA:
-**"What are you trying to do?"**
-
-## 4. My Records
-
+## 4. Record Vault (My Records)
 Categories:
 - Identity
 - Education
@@ -59,79 +100,53 @@ Categories:
 - Finance
 - Healthcare
 
-The MVP can initially implement only categories needed by the demo while keeping the data model extensible.
+Features:
+- Categorized record grid and list views.
+- Upload UX supporting PDF, PNG, JPEG with file validation and progress feedback.
+- Clear record statuses: `VERIFIED` (authoritative source only), `PENDING`, `UNVERIFIED`, `EXPIRED`, `REVOKED`.
+- Never claim "Verified" merely because OCR or classification succeeded.
 
-## 5. Record detail
-
+## 5. Record Detail View
 Display:
-- document title
-- type
-- issuer field if extracted
-- dates if available
-- processing status
-- external verification status if available
-- source type
-- last updated
+- Document title & category
+- Issuer field (if extracted)
+- Issue date & expiry date (if available)
+- LifePass processing status (`uploaded`, `processing`, `processed`, `needs_review`)
+- External verification status (`not_verified`, `source_verified`, `verification_unavailable`)
+- Source type and upload timestamp
 
-Never display "Verified" merely because OCR/classification succeeded.
+## 6. AI Context Assistant & Requirements
+Flow:
+1. User enters life goal (e.g. *"I want to apply for university admission"*).
+2. AI identifies structured task and retrieves requirement profile.
+3. System matches against vault records.
+4. UI displays:
+   - Interpreted intent and requirement profile
+   - Matched records (green badge)
+   - Missing records (amber badge)
+   - Attention items (expired or low confidence)
+   - Readiness score (e.g. `80%`)
+   - Human explanation of remaining steps
+   - Primary action: "Review & Share" or "Upload Missing Records"
 
-## 6. AI Assistant
-
-Example:
-> "I want to apply for an education loan."
-
-Show:
-- interpreted task
-- relevant requirements
-- records found
-- missing records
-- attention items
-- readiness
-
-User can inspect before sharing.
-
-## 7. Requests
-
-Tabs/status:
-- Pending
-- Active
-- Completed
-- Expired
-
-Request detail shows:
-- organization
-- purpose
-- requested requirements
-- selected records
-- expiry
-- consent action
-
-## 8. Consent
-
-Consent screen must clearly show:
-- who is requesting
-- why
-- which records
-- duration/expiry
-- what will happen after approval
-
-Actions:
-- Allow
-- Deny
-
-No hidden consent.
+## 7. Requests & Consent
+- **Request List:** Pending, Active, Completed, Expired.
+- **Consent Review Screen:**
+  - Clearly identifies requesting organization and purpose.
+  - Displays exactly which records will be shared.
+  - Expiry and duration terms.
+  - Actions: **Allow** (grants temporary scoped access) or **Deny** (records remain private).
+  - Explicit user consent only; no hidden or automated grants.
 
 # Part B — Institution Web Portal
 
-## 9. Technology
+## 8. Technology
 - React
 - TypeScript
-- Desktop-first responsive web UI
+- Desktop and tablet optimized responsive web UI (`apps/web/**`).
+- Authentication uses username and password model.
 
-Institution login uses the same Supabase Auth phone-number OTP security boundary; successful authentication is required before portal access.
-
-## 10. Navigation
-
+## 9. Navigation
 ```text
 Dashboard
 Applications/Requests

@@ -1,7 +1,7 @@
 # LifePass — Testing & QA
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. QA objective
 
@@ -20,20 +20,18 @@ Prove that LifePass:
 - signed-out user cannot access protected data
 - institution user cannot access citizen-only data without authorization
 
-## 2.5 Phone OTP authentication tests
+## 2.5 Username & Password Authentication Tests
 
 Verify:
-- valid phone number can request OTP
-- actual SMS is delivered through the configured provider in the real acceptance environment
-- correct OTP creates an authenticated session
-- incorrect OTP is rejected
-- expired OTP is rejected
-- resend respects configured Auth/provider limits
-- signed-out user cannot access protected application data
-- OTP value is not persisted in the LifePass database/client storage/logs
-
-Critical:
-A UI that only displays “OTP sent” or accepts a hard-coded/mock OTP does NOT pass the authentication acceptance test.
+- valid individual registration creates account and starts authenticated session
+- valid institution officer registration creates account with institution metadata
+- correct username/password credentials establish an authenticated session
+- incorrect username or password is rejected with a clean error
+- password length validation (minimum 6 characters) is enforced on client and auth layer
+- passwords are never stored in plaintext in database, `localStorage`, or application logs
+- signed-out user cannot access protected application data or vault records
+- frontend mock auth adapter isolates UI development from live Supabase credentials without configuration warnings
+- *Consent OTP Distinction:* Temporary access authorization codes for record sharing are tested under Section 9 (Consent tests).
 
 ## 3. RLS tests
 

@@ -1,12 +1,12 @@
 # LifePass — API Contract
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. Contract principles
 
 - JSON request/response format.
-- Authenticated endpoints require a valid Supabase session.
+- Authenticated endpoints require a valid authenticated session.
 - Authorization is enforced server-side.
 - Stable error codes.
 - No secret values in responses.
@@ -14,21 +14,19 @@
 
 ## 2. Authentication
 
-Authentication is handled by Supabase Auth using phone-number OTP.
+Authentication is handled by Supabase Auth (or client-side auth adapter during isolated frontend development) using a **Username and Password** model.
 
-### Phone OTP flow
+### Authentication Flow:
 
-1. Client submits a phone number to Supabase Auth OTP sign-in.
-2. Supabase Auth requests delivery through the configured SMS provider.
-3. The user enters the OTP received by SMS.
-4. Supabase Auth verifies the OTP and establishes the authenticated session.
-5. Protected LifePass server-side functions/services receive the authenticated session token.
+1. Client submits username and password credentials via login or registration.
+2. The authentication service validates credentials and returns an authenticated session.
+3. Protected LifePass server-side functions and endpoints receive the authenticated session bearer token.
 
-LifePass must not expose a custom OTP verification authority or store OTP codes in the application database.
+LifePass does not store plaintext passwords in application tables or logs.
 
-The LifePass API does not require separate custom `/auth/otp/*` endpoints; authentication remains owned by Supabase Auth.
+The LifePass API does not expose custom `/auth/otp/*` login endpoints.
 
-Clients send the authenticated session token to protected server-side functions/services.
+*Note on Temporary Access OTPs:* The separate temporary-access verification / OTP mechanism for authorizing institutional access to personal records is managed under Section 7 (Consent endpoints) and is distinct from login authentication.
 
 ## 3. User endpoints
 

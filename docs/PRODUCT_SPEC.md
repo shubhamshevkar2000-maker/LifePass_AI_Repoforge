@@ -1,7 +1,7 @@
 # LifePass — Product Specification
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. Product definition
 
@@ -79,24 +79,23 @@ The prototype will demonstrate selected education and finance workflows rather t
 
 ## 6. MVP features
 
-### User mobile app
-- Phone-number authentication with real OTP SMS
-- OTP verification through Supabase Auth
-- Home/dashboard
-- My Records
-- Record categories
-- Add/upload record
-- Record details
-- AI assistant
-- Requirements/readiness result
-- Requests
-- Request detail
-- Consent screen
-- Notifications
-- Settings/profile
+### Individual responsive web application
+*(Active frontend target: `apps/web/**`. Note: The original native mobile app in `apps/mobile/**` is preserved as a legacy prototype reference; all active user feature work is implemented as responsive web).*
+- Username and password authentication (with registration)
+- Home / Dashboard (greeting, "What are you trying to accomplish?", primary hackathon scenario: College Admission)
+- Record Vault / My Records (categories: Identity, Education, Employment, Finance, Healthcare)
+- Add/upload record (MIME check, secure storage upload)
+- Record details (metadata, processing status, external verification status)
+- AI Context Assistant (intent parsing, requirement retrieval, structured matching, explanations)
+- Requirements & readiness result display
+- Requests & access requests
+- Request detail & structured review
+- Consent review screen (specific, time-bound, allow/deny)
+- Notifications & audit activity
+- Settings & profile
 
 ### Institution web portal
-- Authentication
+- Authentication (Username and password login & registration)
 - Dashboard
 - Applications/requests
 - Create verification/request workflow
@@ -108,9 +107,12 @@ The prototype will demonstrate selected education and finance workflows rather t
 
 ## 6.5 Authentication requirement
 
-LifePass authentication uses phone number + OTP through Supabase Auth. A valid authenticated session is required before protected records, requests, consent, or profile data can be accessed.
-
-Real SMS delivery is required for the actual login acceptance path. A frontend-only or hard-coded OTP is not considered implemented authentication.
+LifePass uses **Username and Password** authentication across both user types:
+- **Individual:** Personal registration (full name, username, password, confirm password, contact phone/info) and login (username, password).
+- **Institution:** Officer registration (full name, institution name, institution type, official contact phone, portal username, password, confirm password) and login (username, password).
+- **No Phone OTP login; No Email login.**
+- **Consent OTP Distinction:** The separate temporary-access verification / OTP mechanism for authorizing institutional access to personal records remains part of the consent/security workflow and is distinct from login authentication.
+- **Frontend Development Mode:** In frontend development, client-side authentication adapters isolate the UI from backend/Supabase credentials with zero configuration warnings.
 
 ## 7. AI features
 

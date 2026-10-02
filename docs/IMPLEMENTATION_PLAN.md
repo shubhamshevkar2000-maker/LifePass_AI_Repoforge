@@ -1,16 +1,17 @@
 # LifePass — Implementation Plan
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. Build strategy
 
-Build in vertical slices.
-
-Do not build four isolated products and integrate at the end.
+Build in vertical slices with isolated parallel workstreams:
+- **Workstream 1 (Frontend):** Responsive Web applications for Individual and Institution (`apps/web/**`).
+- **Workstream 2 (AI):** Context Engine, document classification, extraction, and explanation (`services/ai/**`).
+- **Workstream 3 (Backend):** Supabase PostgreSQL, Storage, RLS, and security policies.
 
 First establish:
-- authentication
+- authentication interfaces (isolated mock in dev; Supabase in prod)
 - database
 - record storage
 - requirement profiles
@@ -19,16 +20,17 @@ First establish:
 - consent
 - institution view
 
-Then expand.
+Then integrate cross-workstream.
 
 ## 2. Phase 0 — Repository and environment
 
 Create:
 - Git repository
-- user app
-- institution web app
+- Individual responsive web experience (`apps/web/**`)
+- Institution responsive web portal (`apps/web/**`)
+- Legacy mobile prototype reference (`apps/mobile/**`, frozen)
 - Supabase project
-- Python AI service
+- Python AI service (`services/ai/**`)
 - environment variable strategy
 
 No secrets committed.
@@ -36,25 +38,22 @@ No secrets committed.
 ## 3. Phase 1 — Foundation
 
 Implement:
-- Supabase Auth
-- phone-number OTP login with real SMS delivery through configured Auth provider
-- OTP verification/session handling
-- profiles
-- user/institution roles
-- base navigation
-- database migrations
-- RLS baseline
+- Username and password authentication baseline
+- Session handling and profile creation
+- User and institution role separation
+- Base responsive navigation shell (`apps/web/**`)
+- Database migrations and RLS baseline
+- Client-side auth adapter for isolated frontend development without live Supabase credentials
 
 Acceptance:
-- user can sign in using phone OTP
-- OTP is actually delivered by SMS in the acceptance environment
-- institution can sign in using the defined Auth flow
-- incorrect/expired OTP fails
+- individual can register and sign in using username/password
+- institution officer can register and sign in using username/password
+- incorrect password fails
 - unauthorized cross-user access fails
 
-### Phase 1.5 — Authentication QA gate
+### Phase 1.5 — Authentication & Interface Gate
 
-Before moving to records, verify the complete phone OTP path in the target environment: phone input → real SMS → OTP verification → Supabase session → protected LifePass data. Do not replace this gate with a mock OTP for demo sign-off.
+Verify that frontend components consume authentication through clean interfaces (`IAuthAdapter`), permitting local development with zero external dependencies and smooth subsequent integration with Supabase Auth.
 
 ## 4. Phase 2 — Records
 
@@ -175,27 +174,51 @@ Focus on:
 - prepared demo account
 - repeatable demo
 
-## 14. Team work allocation
+## 14. Team work allocation (Parallel Workstreams)
 
-### Member A
-User mobile app.
+### Workstream 1 — Frontend (Lead Engineer)
+- **Scope:** `apps/web/**`
+- **Deliverables:** Responsive web application for both **Individual** and **Institution** experiences.
+- **Components:** Landing page role selection, Individual dashboard/vault/AI/consent, Institution dashboard/requests/audit.
+- *(Note: `apps/mobile/**` is a legacy prototype reference; receives no further feature work).*
 
-### Member B
-Supabase/database/backend.
+### Workstream 2 — AI Context Engine (Separate Developer)
+- **Scope:** `services/ai/**`
+- **Deliverables:** FastAPI service, intent parsing, requirement retrieval, document classification, metadata extraction, explanation.
 
-### Member C
-AI/document pipeline.
+### Workstream 3 — Backend, Database & Security (Separate Developer)
+- **Scope:** `supabase/**`, PostgreSQL, RLS, Storage, edge functions, server authorization, audit trails.
 
-### Member D
-Institution portal/integration/demo.
+## 15. Revised Frontend Implementation Roadmap (F-1 through F-12)
 
-All members must understand:
-- architecture
-- data flow
-- verification boundary
-- consent flow
+The frontend workstream in `apps/web/**` proceeds along the following sequence:
 
-## 15. Development rule
+- **F-1: Product/Frontend Reframe + Auth UX**  
+  Landing screen role selector (Individual vs Institution), tabbed username/password login & registration for both sides, mock auth adapter with session persistence, zero configuration warnings.
+- **F-2: Shared Responsive Web Shell + Landing / Role Selection**  
+  Unified responsive layout primitives, mobile navigation drawer/bottom navigation, desktop sidebar, brand elements, user switcher.
+- **F-3: Individual Dashboard**  
+  Personalized greeting, "What are you trying to accomplish?" AI prompt, suggested life tasks (**College Admission** priority), record counts, active permissions summary.
+- **F-4: Individual Record Vault + Upload UX**  
+  Multi-category record browsing, upload modal with progress, record cards, status badges (`VERIFIED`, `PENDING`, `UNVERIFIED`, `EXPIRED`).
+- **F-5: Individual AI Task / Requirement Experience**  
+  Task input submission, requirement profile display, matched vs missing records, readiness percentage, human explanation.
+- **F-6: Individual Consent / Access Request Experience**  
+  Incoming request view, purpose & duration review, record selection, explicit Allow/Deny actions, active permissions management.
+- **F-7: Institution Dashboard**  
+  Institution metrics, active applications, pending requests, attention items.
+- **F-8: Institution Request Creation**  
+  Applicant selector, workflow purpose, requirement profile attachment, expiry definition.
+- **F-9: Institution Applications + Detail**  
+  Application tracking table, applicant status, requirement checklist inspection.
+- **F-10: Consented Record Package + AI Explanation**  
+  Structured consented package view, metadata inspection, verification indicators, AI explanation.
+- **F-11: Audit + Settings**  
+  Audit event log, role settings, security status.
+- **F-12: Frontend QA + Cross-Workstream Integration Readiness**  
+  End-to-end frontend verification, mock-to-backend adapter readiness, responsiveness testing.
+
+## 16. Development rule
 
 Do not implement a later phase by violating an earlier contract.
 

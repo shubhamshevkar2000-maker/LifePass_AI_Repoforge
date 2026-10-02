@@ -1,33 +1,58 @@
 import React from 'react';
 import { InstitutionAuthProvider, useInstitutionAuth } from './context/InstitutionAuthContext';
+import { LandingRoleSelectionView } from './components/LandingRoleSelectionView';
+import { IndividualAuthView } from './components/IndividualAuthView';
 import { InstitutionLoginView } from './components/InstitutionLoginView';
 import { AccessDeniedView } from './components/AccessDeniedView';
 import { InstitutionDashboardFoundation } from './components/InstitutionDashboardFoundation';
+import { IndividualDashboardFoundation } from './components/IndividualDashboardFoundation';
 import { AppLayout } from './components/layout/AppLayout';
 import { Spinner } from './components/ui/Spinner';
 
 const WebRouter: React.FC = () => {
-  const { session, isMemberVerified, isLoading } = useInstitutionAuth();
+  const { session, user, isMemberVerified, isLoading, selectedPortal } = useInstitutionAuth();
 
   if (isLoading) {
     return (
       <div style={styles.centerContainer}>
-        <Spinner size="lg" label="Verifying Institution Credentials..." />
-        <p style={styles.loadingText}>Verifying Institution Credentials...</p>
+        <Spinner size="lg" label="Initializing LifePass Platform..." />
+        <p style={styles.loadingText}>Initializing LifePass Platform...</p>
       </div>
     );
   }
 
-  // Unauthenticated -> Show Phone OTP login
-  if (!session) {
+  // 1. Unauthenticated -> Route based on selectedPortal
+  if (!session || !user) {
+    if (selectedPortal === 'individual') {
+      return (
+        <div style={styles.centerContainer}>
+          <IndividualAuthView />
+        </div>
+      );
+    }
+
+    if (selectedPortal === 'institution') {
+      return (
+        <div style={styles.centerContainer}>
+          <InstitutionLoginView />
+        </div>
+      );
+    }
+
+    // Default entry is the two-sided Landing Screen
     return (
-      <div style={styles.centerContainer}>
-        <InstitutionLoginView />
+      <div style={styles.landingContainer}>
+        <LandingRoleSelectionView />
       </div>
     );
   }
 
-  // Authenticated BUT not an active member in public.institution_members -> Access Denied
+  // 2. Authenticated as Individual -> Individual Responsive Web Dashboard
+  if (user.userType === 'INDIVIDUAL') {
+    return <IndividualDashboardFoundation />;
+  }
+
+  // 3. Authenticated as Institution Member -> Verify institution membership
   if (!isMemberVerified) {
     return (
       <div style={styles.centerContainer}>
@@ -36,7 +61,7 @@ const WebRouter: React.FC = () => {
     );
   }
 
-  // Authenticated and verified active institution member -> Mount inside AppLayout
+  // 4. Authenticated & verified Institution Officer -> Mount inside AppLayout
   return (
     <AppLayout>
       <InstitutionDashboardFoundation embedded />
@@ -53,6 +78,16 @@ export default function App() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  landingContainer: {
+    minHeight: '100vh',
+    backgroundColor: '#090D16',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1.5rem',
+    boxSizing: 'border-box',
+  },
   centerContainer: {
     minHeight: '100vh',
     backgroundColor: '#090D16',

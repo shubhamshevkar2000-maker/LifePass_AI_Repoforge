@@ -1,7 +1,7 @@
 # LifePass — Backend Specification
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. Backend responsibilities
 
@@ -195,16 +195,16 @@ Free-form LLM output cannot directly modify:
 - readiness
 - institutional decision
 
-## 13. Phone OTP authentication
+## 13. Authentication integration
 
-Supabase Auth owns phone-number OTP authentication. The LifePass backend integrates with the authenticated Supabase session and does not generate or persist OTP codes.
+Supabase Auth owns user and institution authentication based on a **Username and Password** credential model.
+The LifePass backend integrates with the authenticated Supabase session and does not persist plaintext passwords or implement insecure custom authentication tables.
 
 Requirements:
-- real SMS delivery through a configured Auth SMS provider
-- OTP verification handled by Supabase Auth
-- server-side authorization still required after authentication
-- no OTP values stored in PostgreSQL or application tables
-- no client-controlled authentication/role escalation
-- Auth/provider expiration, resend limits, and anti-abuse controls must be respected
-
-OTP success establishes authentication only; it does not grant access to another user's records or bypass RLS/consent rules.
+- Clean username and password validation during authentication
+- Server-side authorization still required after authentication
+- No plain-text passwords stored in application tables or logs
+- No client-controlled role escalation
+- Auth-side rate-limiting and anti-abuse controls must be respected
+- Login success establishes authentication only; it does not grant access to another user's records or bypass RLS/consent rules.
+- **Consent OTP Distinction:** The separate temporary-access verification / OTP mechanism used during institutional record sharing remains part of the consent/security workflow and is distinct from login authentication.

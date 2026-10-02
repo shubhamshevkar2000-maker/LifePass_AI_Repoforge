@@ -1,68 +1,84 @@
 # LifePass — Architecture
 
-**Version:** 1.1  
-**Status:** Frozen baseline
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE
 
 ## 1. High-level architecture
 
 ```text
-                    LIFE PASS
-                        |
-        +---------------+---------------+
-        |                               |
- React Native + Expo              React Web Portal
-   Citizen Mobile App              Institution Portal
-        |                               |
-        +---------------+---------------+
-                        |
-                    Supabase
-        +---------------+---------------+
-        |        |        |       |      |
-      Auth   PostgreSQL Storage   RLS  Functions
-       |
-   Phone OTP + SMS provider
-                        |
-                Application Services
-                        |
-              Python AI/Document Service
-                        |
-          +-------------+-------------+
-          |             |             |
-        Intent       RAG/KB       Document AI
-          |             |             |
-          +-------------+-------------+
-                        |
-                 Matching Engine
-                        |
-                 Consent Workflow
-                        |
-                   Audit Layer
+                                LifePass AI
+                                     │
+                    ┌────────────────┴────────────────┐
+                    │                                 │
+           INDIVIDUAL SIDE                   INSTITUTION SIDE
+        Responsive React Web               Responsive React Web
+           (apps/web/**)                      (apps/web/**)
+          [Mobile/Tablet/PC]                 [Desktop/Tablet]
+                    │                                 │
+                    └────────────────┬────────────────┘
+                                     │
+                             Frontend Auth Adapter
+                      (Mock in dev / Supabase in prod)
+                                     │
+                                 Supabase
+                    ┌────────────────┼────────────────┐
+                    │        │       │        │       │
+                  Auth   PostgreSQL Storage  RLS  Functions
+                    │
+           Username/Password
+                                     │
+                            Application Services
+                                     │
+                         Python AI/Document Service
+                                  (FastAPI)
+                    ┌────────────────┼────────────────┐
+                    │                │                │
+                  Intent           RAG/KB        Document AI
+                    │                │                │
+                    └────────────────┼────────────────┘
+                                     │
+                              Matching Engine
+                                     │
+                              Consent Workflow
+                           (Temporary Access OTP)
+                                     │
+                                Audit Layer
+
+[Legacy Prototype Reference: apps/mobile/** (React Native/Expo) — Frozen, Non-active]
 ```
 
 ## 2. Frontend architecture
 
-### User
-React Native + Expo + TypeScript.
+### Individual (Citizen / Record Owner)
+React + TypeScript responsive web application (`apps/web/**`).
+
+Architecture:
+- App-like responsive layout supporting mobile web browsers, tablets, and desktop displays.
+- Responsive shell with mobile hamburger navigation and desktop sidebar.
+- Single unified design system reusing W-1 primitives (`Button`, `Input`, `Card`, `Badge`, `Modal`, `Table`, `Spinner`).
+- Decoupled from backend via client-side adapters during isolated frontend development.
 
 Responsibilities:
-- UI
-- navigation
-- session handling
-- record browsing
-- uploads
-- AI request submission
-- displaying requirement/matching results
-- consent interaction
-- notifications
+- Landing & role discovery
+- Individual registration & login (Username/Password)
+- Life-stage dashboard (with primary hackathon focus: College Admission)
+- Record vault browsing & uploading
+- AI task submission & requirement review
+- Access request review & explicit consent granting/denial
+- Active permissions & audit activity inspection
 
-The client must not contain privileged secrets or authoritative security logic.
+*(Note: The original native mobile prototype in `apps/mobile/**` is frozen and no longer an active frontend target).*
 
-### Institution
-React + TypeScript web application.
+### Institution (Verifying Organization)
+React + TypeScript responsive web application (`apps/web/**`).
 
 Responsibilities:
-- institution authentication
-- request creation
+- Institution authentication (Username/Password) & officer registration
+- Request creation & requirement profile assignment
+- Application/request tracking dashboard
+- Requirement checklist & verification views
+- Consented record package inspection
+- Audit trail & compliance views
 - application/request dashboard
 - requirement views
 - consented package display
@@ -181,6 +197,9 @@ A component may be added only when a real requirement justifies it.
 
 ## 10. Authentication flow
 
-Supabase Auth is the authentication authority for LifePass phone-number OTP login. The SMS delivery provider is configured within the Auth layer. Citizen and institution clients only collect the phone number/OTP and consume the resulting authenticated session; they do not implement OTP generation or verification authority.
-
-No second authentication provider or custom OTP database is introduced.
+LifePass enforces **Username and Password** authentication across both Individual and Institution web clients:
+- **Individual Credentials:** Authenticated using clean username/password credentials created during registration.
+- **Institution Credentials:** Authenticated using portal username/password credentials linked to an official institution membership.
+- **Client-Side Auth Adapter:** During parallel frontend development, a clean `IAuthAdapter` isolates the web client from live backend/Supabase credentials, running seamlessly with zero configuration warnings.
+- **Production Authority:** During final cross-workstream integration, Supabase Auth serves as the production authentication authority.
+- **Consent OTP Distinction:** Temporary access OTP / authorization codes used during institutional record sharing remain part of the consent/security workflow and are distinct from login authentication.

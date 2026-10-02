@@ -1,7 +1,7 @@
 # LifePass — Database Schema
 
-**Version:** 1.1  
-**Status:** Frozen baseline  
+**Version:** 1.2  
+**Status:** REVISED ARCHITECTURAL BASELINE  
 **Database:** Supabase PostgreSQL
 
 ## 1. Design principles
@@ -19,8 +19,10 @@
 
 ### profiles
 - `id uuid PK` — references auth user
+- `username text unique nullable`
 - `full_name text`
 - `phone text nullable`
+- `role text nullable`
 - `avatar_url text nullable`
 - `created_at timestamptz`
 - `updated_at timestamptz`
@@ -167,7 +169,9 @@ If embeddings are persisted in Postgres later, the change must be explicitly doc
 
 ## 8.5 Authentication data boundary
 
-Phone OTP verification is owned by Supabase Auth and is not represented as an application OTP table. Do not add OTP code, OTP secret, or OTP verification columns to the LifePass schema. The application database stores only profile/application data needed after successful authentication.
+Authentication is managed by Supabase Auth (or auth adapter during isolated frontend development) using a **Username and Password** model. Do not store plaintext passwords in application tables. The application database stores only profile and application data needed after successful authentication.
+
+*Temporary Consent Verification:* The separate temporary-access verification / OTP mechanism for authorizing institutional access to personal records is managed under consent records and access requests, not as login authentication credentials.
 
 ## 9. RLS baseline
 
