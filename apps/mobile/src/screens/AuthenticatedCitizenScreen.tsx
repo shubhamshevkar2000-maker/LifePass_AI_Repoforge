@@ -12,7 +12,13 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
-export const AuthenticatedCitizenScreen: React.FC = () => {
+interface AuthenticatedCitizenScreenProps {
+  onBackToHome?: () => void;
+}
+
+export const AuthenticatedCitizenScreen: React.FC<AuthenticatedCitizenScreenProps> = ({
+  onBackToHome,
+}) => {
   const { user, profile, signOut, updateProfileName } = useAuth();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -34,6 +40,15 @@ export const AuthenticatedCitizenScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
+        {onBackToHome && (
+          <TouchableOpacity
+            style={styles.backHomeBtn}
+            onPress={onBackToHome}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backHomeBtnText}>← Back to Home</Text>
+          </TouchableOpacity>
+        )}
         <View style={styles.card}>
           <View style={styles.header}>
             <View style={styles.badgeSuccess}>
@@ -77,7 +92,7 @@ export const AuthenticatedCitizenScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Enter your full legal name"
-                placeholderTextColor="#4B5563"
+                placeholderTextColor="#94A3B8"
                 value={fullName}
                 onChangeText={setFullName}
                 editable={!isUpdating}
@@ -108,7 +123,7 @@ export const AuthenticatedCitizenScreen: React.FC = () => {
               disabled={isUpdating}
             >
               {isUpdating ? (
-                <ActivityIndicator color="#090D16" size="small" />
+                <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <Text style={styles.saveButtonText}>Save Profile Name</Text>
               )}
@@ -137,7 +152,7 @@ export const AuthenticatedCitizenScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: '#F8FAFC',
   },
   container: {
     flexGrow: 1,
@@ -146,20 +161,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   card: {
-    backgroundColor: '#111827',
-    borderColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
     borderWidth: 1,
     borderRadius: 16,
     padding: 24,
     width: '100%',
     maxWidth: 480,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   header: {
     marginBottom: 20,
   },
   badgeSuccess: {
     alignSelf: 'flex-start',
-    backgroundColor: '#064E3B',
+    backgroundColor: '#ECFDF5',
     borderColor: '#059669',
     borderWidth: 1,
     borderRadius: 6,
@@ -168,7 +188,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   badgeSuccessText: {
-    color: '#34D399',
+    color: '#059669',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.5,
@@ -176,16 +196,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#F9FAFB',
+    color: '#0F172A',
   },
   subtitle: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#64748B',
     marginTop: 2,
   },
   infoSection: {
-    backgroundColor: '#090D16',
-    borderColor: '#1F2937',
+    backgroundColor: '#F8FAFC',
+    borderColor: '#E2E8F0',
     borderWidth: 1,
     borderRadius: 10,
     padding: 14,
@@ -194,7 +214,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#E5E7EB',
+    color: '#0F172A',
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -203,27 +223,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
-    borderBottomColor: '#1F2937',
+    borderBottomColor: '#E2E8F0',
     borderBottomWidth: 1,
   },
   infoLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#64748B',
   },
   infoValue: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#F9FAFB',
+    color: '#0F172A',
   },
   infoValueMonospace: {
     fontSize: 11,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    color: '#38BDF8',
+    color: '#0284C7',
     maxWidth: '55%',
   },
   profileSection: {
-    backgroundColor: '#090D16',
-    borderColor: '#1F2937',
+    backgroundColor: '#F8FAFC',
+    borderColor: '#E2E8F0',
     borderWidth: 1,
     borderRadius: 10,
     padding: 14,
@@ -231,7 +251,7 @@ const styles = StyleSheet.create({
   },
   profileNote: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#64748B',
     marginBottom: 12,
   },
   inputContainer: {
@@ -240,21 +260,21 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#D1D5DB',
+    color: '#334155',
     marginBottom: 4,
   },
   input: {
-    backgroundColor: '#111827',
-    borderColor: '#374151',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#CBD5E1',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#F9FAFB',
+    color: '#0F172A',
     fontSize: 14,
   },
   saveButton: {
-    backgroundColor: '#38BDF8',
+    backgroundColor: '#0284C7',
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center',
@@ -264,7 +284,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   saveButtonText: {
-    color: '#090D16',
+    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
   },
@@ -274,13 +294,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   msgBoxSuccess: {
-    backgroundColor: '#064E3B',
-    borderColor: '#059669',
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
     borderWidth: 1,
   },
   msgBoxError: {
-    backgroundColor: '#450A0A',
-    borderColor: '#7F1D1D',
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
     borderWidth: 1,
   },
   msgText: {
@@ -288,14 +308,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   msgTextSuccess: {
-    color: '#A7F3D0',
+    color: '#059669',
   },
   msgTextError: {
-    color: '#FCA5A5',
+    color: '#DC2626',
   },
   foundationCard: {
-    backgroundColor: '#1E293B',
-    borderColor: '#334155',
+    backgroundColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
     borderWidth: 1,
     borderRadius: 10,
     padding: 14,
@@ -304,24 +324,36 @@ const styles = StyleSheet.create({
   foundationTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#38BDF8',
+    color: '#0369A1',
     marginBottom: 4,
   },
   foundationText: {
     fontSize: 11,
-    color: '#CBD5E1',
+    color: '#475569',
     lineHeight: 16,
   },
   signOutButton: {
-    borderColor: '#374151',
+    borderColor: '#E2E8F0',
     borderWidth: 1,
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
   },
   signOutButtonText: {
-    color: '#9CA3AF',
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  backHomeBtn: {
+    paddingVertical: 10,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  backHomeBtnText: {
+    color: '#0284C7',
     fontSize: 13,
     fontWeight: '600',
   },
 });
+

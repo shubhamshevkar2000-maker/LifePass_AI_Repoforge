@@ -76,7 +76,7 @@ export const PhoneEntryScreen: React.FC<PhoneEntryScreenProps> = ({ onOtpSent })
             <TextInput
               style={styles.input}
               placeholder="+14155552671 or +919876543210"
-              placeholderTextColor="#4B5563"
+              placeholderTextColor="#94A3B8"
               keyboardType="phone-pad"
               autoComplete="tel"
               value={phoneNumber}
@@ -103,7 +103,7 @@ export const PhoneEntryScreen: React.FC<PhoneEntryScreenProps> = ({ onOtpSent })
             activeOpacity={0.8}
           >
             {isSubmitting ? (
-              <ActivityIndicator color="#090D16" />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.buttonText}>Send Verification Code</Text>
             )}
@@ -123,7 +123,7 @@ export const PhoneEntryScreen: React.FC<PhoneEntryScreenProps> = ({ onOtpSent })
 const styles = StyleSheet.create({
   keyboardContainer: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: '#F8FAFC',
   },
   scrollContent: {
     flexGrow: 1,
@@ -131,14 +131,19 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   card: {
-    backgroundColor: '#111827',
-    borderColor: '#1F2937',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
     borderWidth: 1,
     borderRadius: 16,
     padding: 24,
     width: '100%',
     maxWidth: 440,
     alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   header: {
     marginBottom: 8,
@@ -146,18 +151,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#F9FAFB',
+    color: '#0F172A',
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: '#64748B',
     marginTop: 2,
   },
   badgeContainer: {
     alignSelf: 'flex-start',
-    backgroundColor: '#1E293B',
-    borderColor: '#334155',
+    backgroundColor: '#E0F2FE',
+    borderColor: '#BAE6FD',
     borderWidth: 1,
     borderRadius: 6,
     paddingHorizontal: 8,
@@ -167,12 +172,12 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#38BDF8',
+    color: '#0284C7',
     letterSpacing: 0.5,
   },
   instruction: {
     fontSize: 14,
-    color: '#D1D5DB',
+    color: '#334155',
     lineHeight: 20,
     marginBottom: 20,
   },
@@ -182,58 +187,58 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#E5E7EB',
+    color: '#334155',
     marginBottom: 6,
   },
   input: {
-    backgroundColor: '#090D16',
-    borderColor: '#374151',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#CBD5E1',
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#F9FAFB',
+    color: '#0F172A',
     fontSize: 15,
   },
   inputHint: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#64748B',
     marginTop: 4,
   },
   warningBox: {
-    backgroundColor: '#3B2900',
-    borderColor: '#78350F',
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FDE68A',
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   warningTitle: {
-    color: '#FCD34D',
+    color: '#B45309',
     fontSize: 12,
     fontWeight: '700',
     marginBottom: 2,
   },
   warningText: {
-    color: '#FDE68A',
+    color: '#92400E',
     fontSize: 11,
     lineHeight: 16,
   },
   errorBox: {
-    backgroundColor: '#450A0A',
-    borderColor: '#7F1D1D',
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
     borderWidth: 1,
     borderRadius: 8,
     padding: 10,
     marginBottom: 16,
   },
   errorText: {
-    color: '#FCA5A5',
+    color: '#DC2626',
     fontSize: 12,
     lineHeight: 18,
   },
   button: {
-    backgroundColor: '#38BDF8',
+    backgroundColor: '#0284C7',
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
@@ -244,19 +249,19 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#090D16',
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
   },
   footer: {
     marginTop: 20,
-    borderTopColor: '#1F2937',
+    borderTopColor: '#E2E8F0',
     borderTopWidth: 1,
     paddingTop: 16,
   },
   footerText: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#64748B',
     textAlign: 'center',
     lineHeight: 16,
   },
