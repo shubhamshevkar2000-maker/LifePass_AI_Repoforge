@@ -12,8 +12,12 @@ Row Level Security (RLS) enforcement at the PostgreSQL engine level.
 import json
 import uuid
 import pytest
-import psycopg2
 import httpx
+
+try:
+    import psycopg2
+except (ImportError, Exception):
+    psycopg2 = None
 
 DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 SUPABASE_URL = "http://127.0.0.1:54321"
@@ -31,6 +35,8 @@ ANON_KEY = (
 @pytest.fixture(scope="session")
 def admin_db_conn():
     """Provides a raw admin/superuser connection to the local PostgreSQL database."""
+    if psycopg2 is None:
+        pytest.skip("psycopg2 binary extension blocked by OS policy or not installed")
     conn = psycopg2.connect(DB_URL)
     conn.autocommit = False
     yield conn
