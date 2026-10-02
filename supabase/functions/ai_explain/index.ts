@@ -47,7 +47,7 @@ serve(async (req) => {
     const AI_SERVICE_URL = Deno.env.get('AI_SERVICE_URL') || 'http://192.168.0.101:8000';
 
     try {
-      const aiResponse = await fetch(`${AI_SERVICE_URL}/api/explain`, {
+      const aiResponse = await fetch(`${AI_SERVICE_URL}/ai/explain`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

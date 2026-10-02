@@ -121,7 +121,7 @@ serve(async (req) => {
     if (req.method === 'POST' && id && action === 'process') {
       const { data: record, error: recordError } = await supabaseClient
         .from('records')
-        .select('id, status')
+        .select('id, status, storage_path, mime_type, file_size')
         .eq('id', id)
         .single();
 
@@ -153,7 +153,59 @@ serve(async (req) => {
         metadata: { action: 'process_triggered' }
       });
 
-      return new Response(JSON.stringify(data), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      // Call Python AI Service for processing
+      const AI_SERVICE_URL = Deno.env.get('AI_SERVICE_URL') || 'http://192.168.0.101:8000';
+      const aiResponse = await fetch(`${AI_SERVICE_URL}/ai/process`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader
+        },
+        body: JSON.stringify({
+          record_id: id,
+          user_id: user.id,
+          storage_path: record.storage_path,
+          mime_type: record.mime_type,
+          file_size: record.file_size
+        })
+      });
+
+      if (!aiResponse.ok) {
+        // Fallback: update status to error/failed
+        await serviceClient.from('records').update({ status: 'uploaded' }).eq('id', id);
+        return new Response(JSON.stringify({ error: { code: 'PROCESSING_FAILED', message: 'Failed to process document in AI service' } }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const aiResult = await aiResponse.json();
+
+      // Persist extraction result using the ACTUAL schema
+      await serviceClient.from('record_extractions').insert({
+        record_id: id,
+        extracted_text: aiResult.extracted_text || '',
+        extracted_metadata: aiResult.metadata || {},
+        classification_confidence: aiResult.classification?.confidence || 0,
+        processing_version: aiResult.processing_version || 'unknown'
+      });
+
+      // Update record status
+      const finalStatus = aiResult.status === 'ready_for_matching' ? 'processed' : 'processed'; // Assuming anything successful ends in processed state for the DB
+      
+      const { data: finalRecord, error: finalUpdateError } = await supabaseClient
+        .from('records')
+        .update({ status: 'processed' }) // The existing record status model maps everything finished to 'processed' except source_rejected
+        .eq('id', id)
+        .select()
+        .single();
+
+      await serviceClient.from('audit_events').insert({
+        actor_user_id: user.id,
+        event_type: 'record_processing_completed',
+        entity_type: 'record',
+        entity_id: id,
+        metadata: { status: 'processed' }
+      });
+
+      return new Response(JSON.stringify(finalRecord), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     return new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: 'Not found' } }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

@@ -144,11 +144,18 @@ class LifeStageContextEngine:
         raw_type = data.get("task_type", "unknown_task")
         canonical_info = get_canonical_task_info(raw_type)
 
+        conf_val = data.get("confidence")
+        if conf_val is None:
+            raise ValueError("confidence cannot be null")
         try:
-            raw_conf = float(data.get("confidence", 0.5))
+            raw_conf = float(conf_val)
         except (ValueError, TypeError):
-            raw_conf = 0.5
-        confidence = max(0.0, min(1.0, round(raw_conf, 2)))
+            raise ValueError("confidence must be a numeric value")
+        
+        if not (0.0 <= raw_conf <= 1.0):
+            raise ValueError("confidence must be in [0,1]")
+            
+        confidence = round(raw_conf, 2)
 
         needs_clarification = bool(
             data.get("needs_clarification", False)

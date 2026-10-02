@@ -1,4 +1,8 @@
 from fastapi import FastAPI, HTTPException, status
+
+from app.schemas.document import DocumentProcessingRequest, DocumentProcessingResult
+from app.document.pipeline import process_document_pipeline
+from supabase import create_client, Client
 from app.core.config import settings
 from app.context.engine import ContextEngine
 from app.context.explanation import generate_readiness_explanation
@@ -12,7 +16,6 @@ from app.schemas.requirement import (
 )
 from app.schemas.context import LifeStageContextRequest, LifeStageContextResult
 from app.schemas.explanation import ExplanationRequest, ExplanationResult
-from app.api.endpoints import router as ai_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -20,7 +23,6 @@ app = FastAPI(
     description="LifePass AI Document Intelligence & Intent Service Foundation",
 )
 
-app.include_router(ai_router, prefix="/api")
 
 @app.get("/")
 def root():
@@ -96,3 +98,36 @@ def retrieve_candidates(request: SemanticRetrievalRequest) -> SemanticRetrievalR
     )
 
 
+
+
+@app.post("/ai/process", response_model=DocumentProcessingResult)
+def process_document(request: DocumentProcessingRequest) -> DocumentProcessingResult:
+    """
+    POST /ai/process
+    Processes a document using the document intelligence pipeline.
+    """
+    supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
+    
+    # Download file content using service role (storage bypasses RLS for service role, allowing processing)
+    # Alternatively, use signed url. We use service role here for secure backend-to-backend access.
+    try:
+        # Download from private 'records' bucket
+        res = supabase.storage.from_("records").download(request.storage_path)
+        content = res
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to download document from storage: {str(e)}",
+        )
+    
+    filename = request.storage_path.split("/")[-1]
+    
+    result = process_document_pipeline(
+        content=content,
+        filename=filename,
+        record_id=request.record_id,
+        user_id=request.user_id,
+        declared_mime_type=request.mime_type
+    )
+    
+    return result
