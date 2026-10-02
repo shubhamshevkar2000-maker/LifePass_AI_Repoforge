@@ -4,6 +4,12 @@ import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { theme } from '../styles/theme';
+import { RecordVaultView } from './vault/RecordVaultView';
+import {
+  VaultRecord,
+  INITIAL_DEMO_RECORDS,
+  calculateVaultMetrics,
+} from '../services/recordVaultRepository';
 
 export const IndividualDashboardFoundation: React.FC = () => {
   const { user, signOut } = useInstitutionAuth();
@@ -12,6 +18,30 @@ export const IndividualDashboardFoundation: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<'college' | 'loan' | 'job' | 'hospital'>('college');
   const [activeNav, setActiveNav] = useState<'home' | 'records' | 'ask' | 'permissions' | 'profile'>('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [records, setRecords] = useState<VaultRecord[]>(INITIAL_DEMO_RECORDS);
+
+  const vaultMetrics = calculateVaultMetrics(records);
+
+  const handleAddRecord = (newRecord: VaultRecord) => {
+    setRecords((prev) => [newRecord, ...prev]);
+  };
+
+  const handleNavigateHomeForTask = (record: VaultRecord) => {
+    setActiveNav('home');
+    if (record.category === 'Education') {
+      setSelectedCategory('education');
+      setSelectedTask('college');
+    } else if (record.category === 'Finance') {
+      setSelectedCategory('finance');
+      setSelectedTask('loan');
+    } else if (record.category === 'Employment') {
+      setSelectedCategory('employment');
+      setSelectedTask('job');
+    } else if (record.category === 'Healthcare') {
+      setSelectedCategory('healthcare');
+      setSelectedTask('hospital');
+    }
+  };
 
   // Normalize display name to a clean, non-email mock identity
   let displayName = user?.fullName || user?.username || 'Shubham';
@@ -143,10 +173,18 @@ export const IndividualDashboardFoundation: React.FC = () => {
         </div>
       )}
 
-      {/* 2. MAIN DASHBOARD CONTENT */}
+      {/* 2. MAIN CONTENT AREA */}
       <main style={styles.main}>
-        {/* Hero Section */}
-        <section style={styles.heroSection}>
+        {activeNav === 'records' ? (
+          <RecordVaultView
+            records={records}
+            onAddRecord={handleAddRecord}
+            onNavigateHomeForTask={handleNavigateHomeForTask}
+          />
+        ) : (
+          <>
+            {/* Hero Section */}
+            <section style={styles.heroSection}>
           <div style={{ marginBottom: '1.25rem' }}>
             <h1 style={styles.greetingTitle}>Hello, {displayName}</h1>
             <p style={styles.greetingSubtitle}>
@@ -202,7 +240,7 @@ export const IndividualDashboardFoundation: React.FC = () => {
               <span style={styles.metricLabel}>Verified Records</span>
               <span style={styles.metricIcon}>✅</span>
             </div>
-            <div style={styles.metricValue}>5</div>
+            <div style={styles.metricValue}>{vaultMetrics.verified}</div>
             <span style={styles.metricSub}>Identity, Education, Finance</span>
           </div>
 
@@ -211,7 +249,9 @@ export const IndividualDashboardFoundation: React.FC = () => {
               <span style={styles.metricLabel}>Pending Verification</span>
               <span style={styles.metricIcon}>⏳</span>
             </div>
-            <div style={styles.metricValue}>1</div>
+            <div style={{ ...styles.metricValue, color: theme.colors.warningText }}>
+              {vaultMetrics.pending}
+            </div>
             <span style={styles.metricSub}>Provisional document under review</span>
           </div>
 
@@ -470,9 +510,19 @@ export const IndividualDashboardFoundation: React.FC = () => {
                       <div style={styles.checkItemName}>Provisional University Admission Letter</div>
                       <div style={styles.checkItemDetail}>Missing: No record found matching admission letter in vault</div>
                     </div>
-                    <Badge variant="danger" size="sm">
-                      MISSING
-                    </Badge>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setActiveNav('records')}
+                        style={{ fontSize: '0.75rem', padding: '0.25rem 0.625rem' }}
+                      >
+                        + Add to Vault
+                      </Button>
+                      <Badge variant="danger" size="sm">
+                        MISSING
+                      </Badge>
+                    </div>
                   </div>
                 </div>
 
@@ -495,7 +545,7 @@ export const IndividualDashboardFoundation: React.FC = () => {
             <div style={styles.summaryCardHeader}>
               <h3 style={styles.summaryTitle}>Personal Record Vault</h3>
               <Badge variant="info" size="sm">
-                5 RECORDS
+                {vaultMetrics.total} RECORDS
               </Badge>
             </div>
             <p style={styles.summaryDesc}>
@@ -503,21 +553,39 @@ export const IndividualDashboardFoundation: React.FC = () => {
             </p>
             <div style={styles.vaultCategoryList}>
               <div style={styles.vaultCatItem}>
-                <span>📁 Identity Documents</span>
-                <span style={styles.vaultCount}>1 record (Aadhaar / National ID)</span>
+                <span>🪪 Identity Documents</span>
+                <span style={styles.vaultCount}>
+                  {records.filter((r) => r.category === 'Identity').length} record(s)
+                </span>
               </div>
               <div style={styles.vaultCatItem}>
                 <span>🎓 Academic Credentials</span>
-                <span style={styles.vaultCount}>2 records (Class 10 & 12)</span>
+                <span style={styles.vaultCount}>
+                  {records.filter((r) => r.category === 'Education').length} record(s)
+                </span>
               </div>
               <div style={styles.vaultCatItem}>
                 <span>🏡 Residence & Domicile</span>
-                <span style={styles.vaultCount}>1 record (Domicile Certificate)</span>
+                <span style={styles.vaultCount}>
+                  {records.filter((r) => r.category === 'Address').length} record(s)
+                </span>
               </div>
               <div style={styles.vaultCatItem}>
                 <span>💳 Financial Records</span>
-                <span style={styles.vaultCount}>1 record (Bank Statement)</span>
+                <span style={styles.vaultCount}>
+                  {records.filter((r) => r.category === 'Finance').length} record(s)
+                </span>
               </div>
+            </div>
+            <div style={{ marginTop: '1.25rem', paddingTop: '0.875rem', borderTop: `1px solid ${theme.colors.borderLight}` }}>
+              <Button
+                variant="primary"
+                size="sm"
+                fullWidth
+                onClick={() => setActiveNav('records')}
+              >
+                Open Record Vault ({vaultMetrics.total} records) →
+              </Button>
             </div>
           </Card>
 
@@ -608,6 +676,8 @@ export const IndividualDashboardFoundation: React.FC = () => {
             </div>
           </Card>
         </section>
+          </>
+        )}
 
         {/* 9. PROTOTYPE ARCHITECTURE BANNER */}
         <div style={styles.architectureBanner}>
