@@ -26,6 +26,7 @@ from app.schemas.document import (
 )
 from app.schemas.requirement import (
     RequirementItemResult,
+    RequirementProfileRequest,
     RequirementProfileResult,
     CandidateRecord,
     SemanticRetrievalResult,
@@ -33,6 +34,12 @@ from app.schemas.requirement import (
 from app.schemas.explanation import (
     ExplanationRequest,
     ExplanationResult,
+)
+from app.schemas.context import (
+    TaskContext,
+    ContextRequirementItem,
+    LifeStageContextRequest,
+    LifeStageContextResult,
 )
 
 __all__ = [
@@ -52,9 +59,15 @@ __all__ = [
     "DocumentProcessingRequest",
     "DocumentProcessingResult",
     "RequirementItemResult",
+    "RequirementProfileRequest",
     "RequirementProfileResult",
     "CandidateRecord",
     "SemanticRetrievalResult",
     "ExplanationRequest",
     "ExplanationResult",
+    "TaskContext",
+    "ContextRequirementItem",
+    "LifeStageContextRequest",
+    "LifeStageContextResult",
 ]
+

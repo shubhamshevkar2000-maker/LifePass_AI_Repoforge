@@ -130,13 +130,15 @@ AI-4: Full Integration + Hardening (Prompt Defense, Performance, Golden Path QA)
 - Verified local Tesseract 5.4.0.20240606 integration and Arial OCR test.
 - **Milestone:** Given an uploaded document, produce a validated `DocumentProcessingResult`. (Status: **COMPLETE**)
 
-### Stage AI-2 — Life-Stage Context Engine
-- Configure Groq Cloud LLM provider (`llama3-70b-8192` or approved model) via LangChain / HTTP client.
+### Stage AI-2 — Life-Stage Context Engine (Complete)
+- Configure Groq Cloud LLM provider (`llama3-70b-8192` or approved model) via HTTP client with environment credentials.
 - Implement `POST /ai/intent` endpoint parsing natural language prompts into `IntentResult`.
+- Implement `POST /ai/requirements` retrieving canonical requirement profiles from controlled KB.
+- Implement `POST /ai/context` endpoint returning unified `LifeStageContextResult`.
 - Implement prompt-injection fences and system instructions isolating untrusted text.
 - Implement structured fallback when user intent is ambiguous or out of scope.
 - Implement `POST /ai/explain` translating deterministic matching results into concise natural language summaries.
-- **Milestone:** Intent parsing and explanation operational with Pydantic validation and error handling.
+- **Milestone:** Intent parsing, requirement retrieval, and explanation operational with Pydantic validation and error handling. (Status: **COMPLETE**)
 
 ### Stage AI-3 — Semantic Retrieval + Matching Assistance
 - Configure FAISS vector store for local similarity indexing.

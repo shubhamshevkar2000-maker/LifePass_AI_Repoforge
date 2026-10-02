@@ -22,6 +22,11 @@ class RequirementItemResult(BaseModel):
     display_order: int = Field(default=1, description="Sort order for UI rendering")
 
 
+class RequirementProfileRequest(BaseModel):
+    """Input to POST /ai/requirements."""
+    task: str = Field(..., min_length=1, max_length=100, description="Canonical task code e.g. education_loan")
+
+
 class RequirementProfileResult(BaseModel):
     """
     Controlled requirement profile retrieved for a life-stage task.

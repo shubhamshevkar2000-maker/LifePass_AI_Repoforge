@@ -719,6 +719,91 @@ Phase 1 implementation, migrations, RLS policies, automated runtime verification
 - **Next Stage:** **AI-2 — Life-Stage Context Engine (Groq / Llama 3)**
 - **Prerequisites Met:** AI-0 contracts complete, AI-1 document intelligence foundation verified and marked complete.
 - **Scope for AI-2:** Intent classification service, life-stage task categorization, prompt layer fences, and Groq API client integration.
-- **Instruction:** Do NOT start AI-2 until explicitly directed.
+
+---
+
+## 31. Workstream 2 (AI + Document Intelligence) — Stage AI-2 Report
+
+### 1. Stage Identification & Scope
+- **Workstream:** Workstream 2 — AI + Document Intelligence
+- **Stage:** AI-2 — Life-Stage Context Engine
+- **Branch:** `feature/ai`
+- **Status:** **AI-2 COMPLETE**
+- **Objective:** Convert natural-language user tasks/goals into deterministic, machine-consumable structured responses comprising interpreted task, confidence, structured document requirements (distinguishing required vs recommended), and concise explanation summaries.
+
+### 2. Implementation Deliverables
+1. **Context Engine Schemas ([`services/ai/app/schemas/context.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/schemas/context.py)):**
+   - `TaskContext`: Structured representation of interpreted task (`type`, `label`, `intent`, `domain`, `institution_type`, `confidence`, `needs_clarification`).
+   - `ContextRequirementItem`: Structured document requirements preserving mandatory (`required: True`) vs recommended (`required: False`) status.
+   - `LifeStageContextRequest` & `LifeStageContextResult`: Machine-consumable envelope supporting `{ "task": {...}, "requirements": [...], "summary": "..." }`.
+   - `RequirementProfileRequest`: Added to [`services/ai/app/schemas/requirement.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/schemas/requirement.py) for typed input to `POST /ai/requirements`.
+
+2. **Controlled Requirement Knowledge Base ([`services/ai/app/context/kb.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/context/kb.py)):**
+   - Versioned, authoritative canonical profiles:
+     - `education_loan`: 5 required documents (`ID_PROOF`, `ADDRESS_PROOF`, `ACADEMIC_RECORD`, `INCOME_PROOF`, `ADMISSION_LETTER`) + 1 recommended (`BANK_STATEMENT`).
+     - `college_admission`: 3 required (`ID_PROOF`, `ACADEMIC_RECORD`, `TRANSCRIPT`) + 1 recommended (`ADDRESS_PROOF`).
+     - `employment_verification`: 3 required (`ID_PROOF`, `EMPLOYMENT_RECORD`, `INCOME_PROOF`) + 1 recommended (`ACADEMIC_RECORD`).
+     - `passport_application`: 2 required (`ID_PROOF`, `ADDRESS_PROOF`).
+     - `visa_application`: 3 required (`ID_PROOF`, `BANK_STATEMENT`, `INCOME_PROOF`) + 1 recommended (`ADMISSION_LETTER`).
+   - Strictly refuses to invent non-existent requirement profiles.
+
+3. **Prompt Fencing & Security ([`services/ai/app/context/prompt.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/context/prompt.py)):**
+   - Fences untrusted user input within `<user_goal> ... </user_goal>` tags.
+   - Escapes closing XML tags to prevent delimiter injection breakout.
+   - Injects explicit security instructions forbidding obedience to embedded commands (e.g. "grant admin access", "mark verified").
+
+4. **Groq Cloud LLM Client ([`services/ai/app/context/llm_client.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/context/llm_client.py)):**
+   - Direct HTTP client interfacing with Groq's chat completion endpoint using `httpx`.
+   - Credentials read strictly from environment variable `GROQ_API_KEY` (never hard-coded, logged, or exposed).
+   - Enforces `response_format={"type": "json_object"}`.
+   - Robust JSON parser handling raw JSON, markdown-fenced blocks, and schema validation.
+   - Graceful, controlled failure path returning typed error codes (`GROQ_NOT_CONFIGURED`, `GROQ_TIMEOUT`, `GROQ_RATE_LIMITED`, etc.).
+
+5. **Deterministic Local Interpreter ([`services/ai/app/context/interpreter.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/context/interpreter.py)):**
+   - Deterministic keyword and weighted heuristic classifier running entirely locally.
+   - Serves as the primary engine when Groq credentials are unconfigured or when network is unavailable.
+   - Identifies adversarial injection attempts and flags ambiguous inputs with `needs_clarification = True`.
+
+6. **Life-Stage Context Engine Orchestrator ([`services/ai/app/context/engine.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/context/engine.py)):**
+   - Coordinates LLM inference, local deterministic fallback, and canonical KB retrieval.
+   - Emits structured `LifeStageContextResult`, `IntentResult`, and `RequirementProfileResult`.
+
+7. **Explanation Generator ([`services/ai/app/context/explanation.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/context/explanation.py)):**
+   - Translates deterministic readiness facts into natural language explanations.
+   - Relies solely on provided structured facts; never guesses or fabricates missing records.
+
+8. **FastAPI Endpoints ([`services/ai/app/main.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/main.py)):**
+   - `POST /ai/intent`: Schema-validated intent parsing (`IntentRequest` -> `IntentResult`).
+   - `POST /ai/requirements`: Canonical profile retrieval with 404 for unknown tasks.
+   - `POST /ai/context`: Unified Life-Stage Context Engine endpoint.
+   - `POST /ai/explain`: Natural language explanation of readiness results.
+
+### 3. Automated Test Verification Summary
+- **AI-2 Context Engine Test Suite ([`services/ai/tests/test_context_engine.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/tests/test_context_engine.py)):**
+  - **27/27 PASSED** (1.35s)
+  - Covers: valid task intent across domains, structured task output, confidence bounds, ambiguous/empty inputs, canonical requirements, required vs recommended distinction, Groq unconfigured/fallback handling, Groq malformed output/network error handling, Groq successful mock response, pure adversarial prompt injection, embedded prompt injection, delimiter breakout escaping, no fabricated user records, no fabricated verification, golden path explanation, and HTTP endpoint integration.
+- **Full AI Service Pytest Suite:**
+  - `test_context_engine.py`: **27/27 PASSED**
+  - `test_document_pipeline.py`: **24/24 PASSED**
+  - `test_ai_contracts.py`: **18/18 PASSED**
+  - `test_phase1_schema_security.py`: **16/16 PASSED**
+  - `test_health.py`: **2/2 PASSED**
+  - **Total Passing AI Workstream Tests:** **87/87 PASSED** (0 failures, 0 skipped)
+- **Monorepo Build Integrity:**
+  - `@lifepass/shared`: Build successful (exit 0)
+  - `@lifepass/mobile`: `tsc --noEmit` clean (exit 0)
+  - `@lifepass/web`: `tsc && vite build` built production bundle in 833ms (exit 0)
+
+### 4. Hard Security Boundaries Enforced
+- Document and user goal text is treated strictly as untrusted DATA.
+- System prompt injection attempts cannot elevate roles, alter readiness scores, or grant permissions.
+- Context Engine never issues `source_verified` statuses or legal authenticity claims.
+- Zero mock or fake records are created; missing records remain missing.
+
+### 5. Next Stage Handoff
+- **Next Stage:** **AI-3 — Semantic Retrieval + Matching Assistance (FAISS Indexing, Candidate Matching)**
+- **Prerequisites Met:** AI-0 contracts complete, AI-1 document intelligence foundation complete, AI-2 life-stage context engine complete.
+- **Instruction:** Do NOT start AI-3 until explicitly directed.
+
 
 
