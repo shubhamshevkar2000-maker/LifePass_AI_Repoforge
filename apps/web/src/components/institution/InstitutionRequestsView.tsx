@@ -1,9 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import {
-  INITIAL_INSTITUTION_REQUESTS,
-  getStatusBadgeConfig,
-  InstitutionRequestSummary,
-} from '../../services/institutionDemoData';
+import { useInstitutionRequests } from '../../context/InstitutionRequestContext';
+import { getStatusBadgeConfig } from '../../services/institutionDemoData';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -16,17 +13,28 @@ export interface InstitutionRequestsViewProps {
 export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = ({
   onCreateRequestClick,
 }) => {
-  const [requests] = useState<InstitutionRequestSummary[]>(INITIAL_INSTITUTION_REQUESTS);
+  const { requests, openCreateWizard, viewRequestDetails } = useInstitutionRequests();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  const handleCreate = () => {
+    if (onCreateRequestClick) {
+      onCreateRequestClick();
+    } else {
+      openCreateWizard();
+    }
+  };
+
   const filtered = useMemo(() => {
     return requests.filter((req) => {
+      const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
-        req.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.purpose.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.requirementProfile.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.applicantIdentifier.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        req.id.toLowerCase().includes(q) ||
+        req.applicantName.toLowerCase().includes(q) ||
+        req.purpose.toLowerCase().includes(q) ||
+        req.requirementProfile.toLowerCase().includes(q) ||
+        req.applicantIdentifier.toLowerCase().includes(q);
 
       const matchesStatus =
         statusFilter === 'ALL' || req.status === statusFilter;
@@ -48,7 +56,7 @@ export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = (
         <Button
           variant="primary"
           size="md"
-          onClick={onCreateRequestClick}
+          onClick={handleCreate}
           icon={<span style={{ fontWeight: 800 }}>+</span>}
         >
           Create Request
@@ -59,14 +67,14 @@ export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = (
       <div style={styles.w3Banner}>
         <div style={styles.w3BannerHeader}>
           <Badge variant="info" size="sm">
-            PHASE W-3 SCHEDULED
+            PHASE W-3 ACTIVE
           </Badge>
           <span style={styles.w3BannerTitle}>
-            Full Request Dispatch Flow Coming in Phase W-3
+            Interactive Request Creation & Simulated Dispatch Active
           </span>
         </div>
         <p style={styles.w3BannerText}>
-          The interactive Multi-Step Request Dispatch wizard (specifying canonical requirement profiles, custom record requests, citizen phone dispatch, and TTL expiration settings) is slated for implementation in Phase W-3.
+          Use <strong>+ Create Request</strong> to configure a verification package, select candidate profiles, customize requested records, and dispatch. Newly dispatched requests immediately register below with status <code style={styles.codeText}>SENT</code>.
         </p>
       </div>
 
@@ -74,7 +82,7 @@ export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = (
       <div style={styles.controlsRow}>
         <input
           type="text"
-          placeholder="Search by applicant name, purpose, or profile..."
+          placeholder="Search by request ID, applicant name, purpose, or profile..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={styles.searchInput}
@@ -87,9 +95,9 @@ export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = (
           style={styles.selectInput}
           aria-label="Filter by status"
         >
-          <option value="ALL">All Statuses</option>
-          <option value="AWAITING_APPLICANT">Awaiting Applicant</option>
+          <option value="ALL">All Statuses ({requests.length})</option>
           <option value="SENT">Sent</option>
+          <option value="AWAITING_APPLICANT">Awaiting Applicant</option>
           <option value="ACTIVE_ACCESS">Active Access</option>
           <option value="APPROVED">Approved</option>
           <option value="EXPIRED">Expired</option>
@@ -118,10 +126,11 @@ export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = (
                 <tr style={styles.tableHeaderRow}>
                   <th style={styles.th}>Request ID</th>
                   <th style={styles.th}>Applicant</th>
-                  <th style={styles.th}>Requirement Profile</th>
+                  <th style={styles.th}>Purpose & Profile</th>
                   <th style={styles.th}>Status</th>
                   <th style={styles.th}>Items</th>
                   <th style={styles.th}>Dispatched / Updated</th>
+                  <th style={{ ...styles.th, textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -130,7 +139,7 @@ export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = (
                   return (
                     <tr key={req.id} style={styles.tableRow}>
                       <td style={styles.td}>
-                        <code style={styles.codeText}>{req.id}</code>
+                        <code style={styles.codeTextHighlight}>{req.id}</code>
                       </td>
                       <td style={styles.td}>
                         <div style={styles.applicantName}>{req.applicantName}</div>
@@ -152,6 +161,15 @@ export const InstitutionRequestsView: React.FC<InstitutionRequestsViewProps> = (
                       </td>
                       <td style={styles.td}>
                         <span style={styles.timestampText}>{req.updatedAt}</span>
+                      </td>
+                      <td style={{ ...styles.td, textAlign: 'right' }}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => viewRequestDetails(req)}
+                        >
+                          Details
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -277,6 +295,15 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '0.25rem',
     fontSize: '0.75rem',
     color: theme.colors.textPrimary,
+  },
+  codeTextHighlight: {
+    fontFamily: theme.typography.fontMono,
+    backgroundColor: theme.colors.surfaceAccent,
+    color: theme.colors.primary,
+    fontWeight: 700,
+    padding: '0.125rem 0.375rem',
+    borderRadius: '0.25rem',
+    fontSize: '0.8125rem',
   },
   applicantName: {
     fontWeight: 600,

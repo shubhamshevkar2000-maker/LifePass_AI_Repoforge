@@ -1,15 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useInstitutionAuth } from '../../context/InstitutionAuthContext';
-import {
-  INITIAL_INSTITUTION_REQUESTS,
-  computeInstitutionMetrics,
-  getStatusBadgeConfig,
-  InstitutionRequestSummary,
-} from '../../services/institutionDemoData';
+import { useInstitutionRequests } from '../../context/InstitutionRequestContext';
+import { getStatusBadgeConfig } from '../../services/institutionDemoData';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
 import { theme } from '../../styles/theme';
 
 export interface InstitutionDashboardViewProps {
@@ -20,17 +15,21 @@ export const InstitutionDashboardView: React.FC<InstitutionDashboardViewProps> =
   onCreateRequestClick,
 }) => {
   const { user, activeMembership } = useInstitutionAuth();
-  const [requests] = useState<InstitutionRequestSummary[]>(INITIAL_INSTITUTION_REQUESTS);
+  const { requests, metrics, openCreateWizard, viewRequestDetails } = useInstitutionRequests();
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
-  const [selectedRequest, setSelectedRequest] = useState<InstitutionRequestSummary | null>(null);
 
   const institutionName = activeMembership?.institution?.name || user?.institutionName || 'LifePass Partner Institution';
   const institutionType = activeMembership?.institution?.type || user?.institutionType || 'Financial Institution';
   const officerName = user?.fullName || user?.username || 'Verified Officer';
   const officerRole = activeMembership?.role?.toUpperCase() || user?.role || 'COMPLIANCE_OFFICER';
 
-  // Compute live summary metrics
-  const metrics = useMemo(() => computeInstitutionMetrics(requests), [requests]);
+  const handleCreate = () => {
+    if (onCreateRequestClick) {
+      onCreateRequestClick();
+    } else {
+      openCreateWizard();
+    }
+  };
 
   // Filter requests
   const filteredRequests = useMemo(() => {
@@ -74,7 +73,7 @@ export const InstitutionDashboardView: React.FC<InstitutionDashboardViewProps> =
           <Button
             variant="primary"
             size="md"
-            onClick={onCreateRequestClick}
+            onClick={handleCreate}
             icon={<span style={{ fontWeight: 800 }}>+</span>}
           >
             Create Request
@@ -226,7 +225,7 @@ export const InstitutionDashboardView: React.FC<InstitutionDashboardViewProps> =
                           <Button
                             variant="secondary"
                             size="sm"
-                            onClick={() => setSelectedRequest(req)}
+                            onClick={() => viewRequestDetails(req)}
                           >
                             Details
                           </Button>
@@ -240,69 +239,6 @@ export const InstitutionDashboardView: React.FC<InstitutionDashboardViewProps> =
           )}
         </Card>
       </section>
-
-      {/* 4. Request Details Modal */}
-      {selectedRequest && (
-        <Modal
-          isOpen={true}
-          onClose={() => setSelectedRequest(null)}
-          title={`Workflow Details: ${selectedRequest.id}`}
-          description={`Verification workflow overview for ${selectedRequest.applicantName}`}
-          footer={
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setSelectedRequest(null)}
-            >
-              Close
-            </Button>
-          }
-        >
-          <div style={styles.modalContent}>
-            <div style={styles.modalRow}>
-              <span style={styles.modalLabel}>Applicant</span>
-              <span style={styles.modalValue}>{selectedRequest.applicantName}</span>
-            </div>
-            <div style={styles.modalRow}>
-              <span style={styles.modalLabel}>Applicant Identifier</span>
-              <code style={styles.codeText}>{selectedRequest.applicantIdentifier}</code>
-            </div>
-            <div style={styles.modalRow}>
-              <span style={styles.modalLabel}>Verification Purpose</span>
-              <span style={styles.modalValue}>{selectedRequest.purpose}</span>
-            </div>
-            <div style={styles.modalRow}>
-              <span style={styles.modalLabel}>Requirement Profile</span>
-              <span style={styles.modalValue}>{selectedRequest.requirementProfile}</span>
-            </div>
-            <div style={styles.modalRow}>
-              <span style={styles.modalLabel}>Requested Documents</span>
-              <span style={styles.modalValue}>{selectedRequest.requestedRecordsCount} canonical records</span>
-            </div>
-            <div style={styles.modalRow}>
-              <span style={styles.modalLabel}>Current Status</span>
-              <Badge variant={getStatusBadgeConfig(selectedRequest.status).variant} size="sm">
-                {getStatusBadgeConfig(selectedRequest.status).label}
-              </Badge>
-            </div>
-            <div style={styles.modalRow}>
-              <span style={styles.modalLabel}>Last Activity</span>
-              <span style={styles.modalValue}>{selectedRequest.updatedAt}</span>
-            </div>
-            {selectedRequest.notes && (
-              <div style={styles.notesBox}>
-                <strong style={{ color: theme.colors.textPrimary }}>Workflow Notes:</strong>
-                <p style={{ margin: '0.25rem 0 0 0', color: theme.colors.textSecondary, fontSize: '0.8125rem' }}>
-                  {selectedRequest.notes}
-                </p>
-              </div>
-            )}
-            <div style={styles.noticeBox}>
-              <strong>Phase Notice:</strong> Deep request lifecycle inspection, document package decryption preview, and approval actions will be connected in Phase W-4 in accordance with <code>docs/FRONTEND_SPEC.md</code> §10.
-            </div>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 };
@@ -524,44 +460,5 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.875rem',
     color: theme.colors.textSecondary,
     margin: 0,
-  },
-  modalContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.75rem',
-  },
-  modalRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: '0.5rem',
-    borderBottom: `1px solid ${theme.colors.borderLight}`,
-    fontSize: '0.875rem',
-  },
-  modalLabel: {
-    color: theme.colors.textSecondary,
-    fontWeight: 500,
-  },
-  modalValue: {
-    color: theme.colors.textPrimary,
-    fontWeight: 600,
-    textAlign: 'right',
-  },
-  notesBox: {
-    backgroundColor: theme.colors.surfaceSubtle,
-    border: `1px solid ${theme.colors.borderLight}`,
-    padding: '0.75rem',
-    borderRadius: theme.radii.sm,
-    marginTop: '0.25rem',
-  },
-  noticeBox: {
-    backgroundColor: theme.colors.surfaceAccent,
-    border: `1px solid ${theme.colors.primaryBorder}`,
-    borderRadius: theme.radii.sm,
-    padding: '0.75rem',
-    fontSize: '0.75rem',
-    color: theme.colors.textPrimary,
-    lineHeight: 1.4,
-    marginTop: '0.5rem',
   },
 };

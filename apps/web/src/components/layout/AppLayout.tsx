@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useInstitutionAuth } from '../../context/InstitutionAuthContext';
+import { useInstitutionRequests } from '../../context/InstitutionRequestContext';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
-import { theme } from '../../styles/theme';
+import { InstitutionRequestWizard } from '../institution/InstitutionRequestWizard';
+import { InstitutionRequestDetailsModal } from '../institution/InstitutionRequestDetailsModal';
 import './layout.css';
 
 export interface AppLayoutProps {
@@ -13,8 +13,14 @@ export interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { user, activeMembership, signOut } = useInstitutionAuth();
+  const {
+    isCreateWizardOpen,
+    openCreateWizard,
+    closeCreateWizard,
+    selectedRequestForDetails,
+    closeRequestDetails,
+  } = useInstitutionRequests();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
   const institutionName = activeMembership?.institution?.name || user?.institutionName || 'Verified Institution';
   const institutionType = activeMembership?.institution?.type || user?.institutionType || 'bank';
@@ -38,7 +44,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <div className="lifepass-body">
         {/* Sidebar Navigation */}
         <Sidebar
-          onCreateRequestClick={() => setIsCreateModalOpen(true)}
+          onCreateRequestClick={openCreateWizard}
           isOpen={isMobileMenuOpen}
           onCloseMobile={() => setIsMobileMenuOpen(false)}
         />
@@ -48,69 +54,24 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <div className="lifepass-main-inner">
             {React.isValidElement(children)
               ? React.cloneElement(children as React.ReactElement<{ onCreateRequestClick?: () => void }>, {
-                  onCreateRequestClick: () => setIsCreateModalOpen(true),
+                  onCreateRequestClick: openCreateWizard,
                 })
               : children}
           </div>
         </main>
       </div>
 
-      {/* 3. Create Request Modal (W-2 Deferred / W-3 Preview) */}
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Create New Verification Request"
-        description="Select an applicant and attach a canonical requirement profile."
-        footer={
-          <>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsCreateModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                alert('Request creation workflow will be implemented in Phase W-3.');
-                setIsCreateModalOpen(false);
-              }}
-            >
-              Acknowledge (W-3 Preview)
-            </Button>
-          </>
-        }
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div
-            style={{
-              backgroundColor: theme.colors.surfaceAccent,
-              border: `1px solid ${theme.colors.primaryBorder}`,
-              borderRadius: '0.5rem',
-              padding: '0.75rem 1rem',
-              fontSize: '0.8125rem',
-              color: theme.colors.textPrimary,
-              lineHeight: 1.4,
-            }}
-          >
-            <strong>Phase W-3 Notice:</strong> The interactive requirement profile selection, candidate dispatch, and custom document request wizard will be implemented in Phase W-3. Create Request is intentionally deferred in Phase W-2.
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: `1px solid ${theme.colors.borderLight}`, fontSize: '0.8125rem' }}>
-            <span style={{ color: theme.colors.textSecondary }}>Target Institution</span>
-            <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>{institutionName}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: `1px solid ${theme.colors.borderLight}`, fontSize: '0.8125rem' }}>
-            <span style={{ color: theme.colors.textSecondary }}>Authorizing Officer</span>
-            <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>{user?.fullName || user?.username || 'Verified Officer'}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', fontSize: '0.8125rem' }}>
-            <span style={{ color: theme.colors.textSecondary }}>Dispatch Mode</span>
-            <span style={{ color: theme.colors.primary, fontWeight: 600 }}>Citizen LifePass Web Inbox</span>
-          </div>
-        </div>
-      </Modal>
+      {/* 3. Multi-Step Request Creation & Dispatch Wizard */}
+      <InstitutionRequestWizard
+        isOpen={isCreateWizardOpen}
+        onClose={closeCreateWizard}
+      />
+
+      {/* 4. Global Request Details Modal */}
+      <InstitutionRequestDetailsModal
+        request={selectedRequestForDetails}
+        onClose={closeRequestDetails}
+      />
     </div>
   );
 };

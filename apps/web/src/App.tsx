@@ -6,6 +6,7 @@ import {
   Navigate,
 } from 'react-router-dom';
 import { InstitutionAuthProvider, useInstitutionAuth } from './context/InstitutionAuthContext';
+import { InstitutionRequestProvider } from './context/InstitutionRequestContext';
 import { LandingRoleSelectionView } from './components/LandingRoleSelectionView';
 import { IndividualAuthView } from './components/IndividualAuthView';
 import { InstitutionLoginView } from './components/InstitutionLoginView';
@@ -194,9 +195,11 @@ const WebRouter: React.FC = () => {
 export default function App() {
   return (
     <InstitutionAuthProvider>
-      <BrowserRouter>
-        <WebRouter />
-      </BrowserRouter>
+      <InstitutionRequestProvider>
+        <BrowserRouter>
+          <WebRouter />
+        </BrowserRouter>
+      </InstitutionRequestProvider>
     </InstitutionAuthProvider>
   );
 }
