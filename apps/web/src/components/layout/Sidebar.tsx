@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { theme } from '../../styles/theme';
 
@@ -6,22 +7,23 @@ export interface NavItem {
   id: string;
   label: string;
   iconSymbol: string;
+  path: string;
   badge?: string;
 }
 
 export interface SidebarProps {
-  activeId: string;
-  onSelectNav: (id: string) => void;
+  activeId?: string;
+  onSelectNav?: (id: string) => void;
   onCreateRequestClick: () => void;
   isOpen: boolean;
   onCloseMobile: () => void;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', iconSymbol: '📊' },
-  { id: 'applications', label: 'Applications', iconSymbol: '📁' },
-  { id: 'audit', label: 'Audit Log', iconSymbol: '🛡️' },
-  { id: 'settings', label: 'Settings', iconSymbol: '⚙️' },
+  { id: 'dashboard', label: 'Dashboard', iconSymbol: '📊', path: '/institution/dashboard' },
+  { id: 'requests', label: 'Requests', iconSymbol: '📁', path: '/institution/requests' },
+  { id: 'audit', label: 'Audit Log', iconSymbol: '🛡️', path: '/institution/audit' },
+  { id: 'settings', label: 'Settings', iconSymbol: '⚙️', path: '/institution/settings' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -31,6 +33,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onCloseMobile,
 }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleNavClick = (item: NavItem) => {
+    if (onSelectNav) {
+      onSelectNav(item.id);
+    }
+    navigate(item.path);
+    onCloseMobile();
+  };
+
   return (
     <>
       {/* Mobile Drawer Backdrop */}
@@ -73,16 +86,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
           >
             {NAV_ITEMS.map((item) => {
-              const isActive = activeId === item.id;
+              // Active if path matches or if activeId matches
+              const isActive =
+                location.pathname === item.path ||
+                (item.id === 'dashboard' && (location.pathname === '/institution' || location.pathname === '/institution/')) ||
+                activeId === item.id;
+
               return (
                 <button
                   key={item.id}
                   type="button"
                   className={`lifepass-nav-item ${isActive ? 'is-active' : ''}`}
-                  onClick={() => {
-                    onSelectNav(item.id);
-                    onCloseMobile();
-                  }}
+                  onClick={() => handleNavClick(item)}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <span style={{ fontSize: '1.125rem' }} role="img" aria-hidden="true">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInstitutionAuth } from '../context/InstitutionAuthContext';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
@@ -8,6 +9,7 @@ import { theme } from '../styles/theme';
 
 export const IndividualAuthView: React.FC = () => {
   const { login, signUpIndividual, error, clearError, setSelectedPortal } = useInstitutionAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -106,7 +108,10 @@ export const IndividualAuthView: React.FC = () => {
       {/* Back to landing */}
       <button
         type="button"
-        onClick={() => setSelectedPortal('landing')}
+        onClick={() => {
+          setSelectedPortal('landing');
+          navigate('/');
+        }}
         style={styles.backButton}
       >
         ← Back to Experience Selection

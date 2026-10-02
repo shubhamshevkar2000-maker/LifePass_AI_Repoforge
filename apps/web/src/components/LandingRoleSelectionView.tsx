@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
@@ -7,6 +8,7 @@ import { theme } from '../styles/theme';
 
 export const LandingRoleSelectionView: React.FC = () => {
   const { setSelectedPortal } = useInstitutionAuth();
+  const navigate = useNavigate();
 
   return (
     <div style={styles.container}>
@@ -63,7 +65,10 @@ export const LandingRoleSelectionView: React.FC = () => {
             variant="primary"
             size="lg"
             fullWidth
-            onClick={() => setSelectedPortal('individual')}
+            onClick={() => {
+              setSelectedPortal('individual');
+              navigate('/individual');
+            }}
             style={styles.ctaButton}
           >
             Continue as Individual →
@@ -103,7 +108,10 @@ export const LandingRoleSelectionView: React.FC = () => {
             variant="secondary"
             size="lg"
             fullWidth
-            onClick={() => setSelectedPortal('institution')}
+            onClick={() => {
+              setSelectedPortal('institution');
+              navigate('/institution/login');
+            }}
             style={styles.ctaButton}
           >
             Continue as Institution →

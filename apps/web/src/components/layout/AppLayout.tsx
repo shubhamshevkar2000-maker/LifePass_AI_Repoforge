@@ -4,8 +4,6 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
 import { theme } from '../../styles/theme';
 import './layout.css';
 
@@ -15,7 +13,6 @@ export interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { user, activeMembership, signOut } = useInstitutionAuth();
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
@@ -41,8 +38,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <div className="lifepass-body">
         {/* Sidebar Navigation */}
         <Sidebar
-          activeId={activeTab}
-          onSelectNav={(id) => setActiveTab(id)}
           onCreateRequestClick={() => setIsCreateModalOpen(true)}
           isOpen={isMobileMenuOpen}
           onCloseMobile={() => setIsMobileMenuOpen(false)}
@@ -51,59 +46,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {/* Main Content Area */}
         <main className="lifepass-main" role="main">
           <div className="lifepass-main-inner">
-            {activeTab === 'dashboard' && (
-              <div>{children}</div>
-            )}
-
-            {activeTab === 'applications' && (
-              <Card
-                title="Applications & Requests"
-                subtitle="Manage verification workflows dispatched to citizens"
-                headerAction={<Badge variant="warning">Scheduled for Phase W-4</Badge>}
-              >
-                <p style={{ color: theme.colors.textSecondary, fontSize: '0.875rem', lineHeight: 1.5, margin: '0 0 1.25rem 0' }}>
-                  The Applications table and detailed applicant checklist views will be connected in Phase W-4 in accordance with <code>docs/FRONTEND_SPEC.md</code> §10 & §13.
-                </p>
-                <Button variant="secondary" size="sm" onClick={() => setActiveTab('dashboard')}>
-                  ← Back to Dashboard
-                </Button>
-              </Card>
-            )}
-
-            {activeTab === 'audit' && (
-              <Card
-                title="Compliance Audit Trail"
-                subtitle="Historical log of request creation, dispatch, and record package access"
-                headerAction={<Badge variant="warning">Scheduled for Phase W-6</Badge>}
-              >
-                <p style={{ color: theme.colors.textSecondary, fontSize: '0.875rem', lineHeight: 1.5, margin: '0 0 1.25rem 0' }}>
-                  The Audit log table will be connected to <code>public.audit_events</code> in Phase W-6 in accordance with <code>docs/SECURITY_CONSENT.md</code> §10.
-                </p>
-                <Button variant="secondary" size="sm" onClick={() => setActiveTab('dashboard')}>
-                  ← Back to Dashboard
-                </Button>
-              </Card>
-            )}
-
-            {activeTab === 'settings' && (
-              <Card
-                title="Institution Settings"
-                subtitle="Organization credentials, registered member roster, and security parameters"
-                headerAction={<Badge variant="warning">Scheduled for Phase W-6</Badge>}
-              >
-                <p style={{ color: theme.colors.textSecondary, fontSize: '0.875rem', lineHeight: 1.5, margin: '0 0 1.25rem 0' }}>
-                  Organization configuration and officer roster management will be connected in Phase W-6.
-                </p>
-                <Button variant="secondary" size="sm" onClick={() => setActiveTab('dashboard')}>
-                  ← Back to Dashboard
-                </Button>
-              </Card>
-            )}
+            {React.isValidElement(children)
+              ? React.cloneElement(children as React.ReactElement<{ onCreateRequestClick?: () => void }>, {
+                  onCreateRequestClick: () => setIsCreateModalOpen(true),
+                })
+              : children}
           </div>
         </main>
       </div>
 
-      {/* 3. Create Request Modal (Primitive Verification) */}
+      {/* 3. Create Request Modal (W-2 Deferred / W-3 Preview) */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -122,11 +74,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               variant="primary"
               size="sm"
               onClick={() => {
-                alert('Request creation form logic will be implemented in Phase W-3.');
+                alert('Request creation workflow will be implemented in Phase W-3.');
                 setIsCreateModalOpen(false);
               }}
             >
-              Confirm Placeholder
+              Acknowledge (W-3 Preview)
             </Button>
           </>
         }
@@ -143,15 +95,19 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               lineHeight: 1.4,
             }}
           >
-            <strong>Phase W-1 Notice:</strong> This modal verifies that the reusable <code>Modal</code> primitive is fully accessible, traps body scroll, and responds to Escape key presses. The full requirement profile selection and applicant dispatch form will be implemented in Phase W-3.
+            <strong>Phase W-3 Notice:</strong> The interactive requirement profile selection, candidate dispatch, and custom document request wizard will be implemented in Phase W-3. Create Request is intentionally deferred in Phase W-2.
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: `1px solid ${theme.colors.borderLight}`, fontSize: '0.8125rem' }}>
             <span style={{ color: theme.colors.textSecondary }}>Target Institution</span>
             <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>{institutionName}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: `1px solid ${theme.colors.borderLight}`, fontSize: '0.8125rem' }}>
-            <span style={{ color: theme.colors.textSecondary }}>Requesting Officer</span>
-            <span style={{ color: theme.colors.primary, fontFamily: theme.typography.fontMono, fontWeight: 600 }}>{user?.username || user?.userId}</span>
+            <span style={{ color: theme.colors.textSecondary }}>Authorizing Officer</span>
+            <span style={{ color: theme.colors.textPrimary, fontWeight: 600 }}>{user?.fullName || user?.username || 'Verified Officer'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', fontSize: '0.8125rem' }}>
+            <span style={{ color: theme.colors.textSecondary }}>Dispatch Mode</span>
+            <span style={{ color: theme.colors.primary, fontWeight: 600 }}>Citizen LifePass Web Inbox</span>
           </div>
         </div>
       </Modal>
