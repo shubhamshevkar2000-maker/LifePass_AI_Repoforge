@@ -10,3 +10,6 @@ pillow>=10.0.0
 numpy>=1.25.0
 faiss-cpu>=1.7.4
 
+supabase>=2.0.0
+groq>=0.4.0
+python-multipart>=0.0.9

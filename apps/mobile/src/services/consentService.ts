@@ -135,7 +135,7 @@ export async function submitConsent(
       if (error) {
          return { data: null, error: { code: 'PROCESSING_FAILED', message: error.message }, isDevFixture: false };
       }
-      return { data: { status: 'granted' as const, message: 'Consent decision recorded' }, error: null, isDevFixture: false };
+      return { data: data as ConsentUiResult, error: null, isDevFixture: false };
 
     } catch {
       console.warn(
