@@ -1,8 +1,9 @@
 /**
- * LifePass AI — Institution Demo Data & Request Service (W-3)
+ * LifePass AI — Institution Demo Data & Request Service (W-3 & W-4)
  *
  * Provides structured mock datasets for institution verification workflows,
- * demo applicants, requirement profiles, TTL options, and dynamically derived metrics.
+ * demo applicants, requirement profiles, TTL options, requirement checklists,
+ * and dynamically derived metrics.
  * Strictly frontend-only mock state with zero backend/database dependencies.
  */
 
@@ -15,11 +16,20 @@ export type InstitutionRequestStatus =
   | 'EXPIRED'
   | 'REJECTED';
 
+export type RequestedRecordDemoState = 'REQUESTED' | 'DEMO_AVAILABLE' | 'DEMO_MISSING';
+
 export interface RequestedRecord {
   id: string;
   label: string;
   category: string;
   description?: string;
+}
+
+export interface ChecklistItem extends RequestedRecord {
+  demoState: RequestedRecordDemoState;
+  demoStateLabel: string;
+  demoStateDescription: string;
+  itemSpecification: string;
 }
 
 export interface DemoApplicant {
@@ -68,10 +78,13 @@ export interface InstitutionRequest {
 export type InstitutionRequestSummary = InstitutionRequest;
 
 export interface InstitutionMetrics {
+  totalRequests: number;
   pendingRequests: number;
   activeApplications: number;
   awaitingApplicantAction: number;
   activeAuthorizedAccess: number;
+  sentRequests: number;
+  expiredRequests: number;
 }
 
 /**
@@ -197,6 +210,103 @@ export function calculateExpiryLabel(hours: number): string {
   }
   
   return `${expiryDate.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${expiryDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+/**
+ * Derives deterministic requirement checklist items for a request in the demo state
+ */
+export function getChecklistItemsForRequest(request: InstitutionRequest): ChecklistItem[] {
+  return request.requestedRecords.map((rec, index) => {
+    let demoState: RequestedRecordDemoState = 'REQUESTED';
+    let demoStateLabel = 'Requested';
+    let demoStateDescription = 'Requested in verification package; awaiting candidate action in citizen web inbox';
+
+    if (request.status === 'ACTIVE_ACCESS' || request.status === 'APPROVED') {
+      demoState = 'DEMO_AVAILABLE';
+      demoStateLabel = 'Available in demo state';
+      demoStateDescription = 'Available in demo package under active temporary access window';
+    } else if (request.status === 'SENT' || request.status === 'DRAFT') {
+      demoState = 'REQUESTED';
+      demoStateLabel = 'Requested';
+      demoStateDescription = 'Requested — dispatched to candidate web inbox; awaiting response';
+    } else if (request.status === 'AWAITING_APPLICANT') {
+      if (index === 0) {
+        demoState = 'DEMO_AVAILABLE';
+        demoStateLabel = 'Available in demo state';
+        demoStateDescription = 'Available in demo candidate profile; pending consent confirmation';
+      } else if (index === 1) {
+        demoState = 'REQUESTED';
+        demoStateLabel = 'Requested';
+        demoStateDescription = 'Requested — candidate notified to review and select record';
+      } else {
+        demoState = 'DEMO_MISSING';
+        demoStateLabel = 'Missing in demo state';
+        demoStateDescription = 'Missing in demo state — record item not present in candidate vault';
+      }
+    } else if (request.status === 'EXPIRED') {
+      demoState = 'DEMO_MISSING';
+      demoStateLabel = 'Missing in demo state';
+      demoStateDescription = 'Missing in demo state — request expired prior to document grant';
+    } else if (request.status === 'REJECTED') {
+      demoState = 'DEMO_MISSING';
+      demoStateLabel = 'Missing in demo state';
+      demoStateDescription = 'Disclosure declined by citizen; item not accessible';
+    }
+
+    return {
+      ...rec,
+      demoState,
+      demoStateLabel,
+      demoStateDescription,
+      itemSpecification: `Canonical record specification: ${rec.label} (${rec.category} category). Required for ${request.purpose}.`,
+    };
+  });
+}
+
+/**
+ * Computes breakdown counts for a checklist
+ */
+export function getChecklistSummary(items: ChecklistItem[]): {
+  total: number;
+  requested: number;
+  demoAvailable: number;
+  demoMissing: number;
+} {
+  const total = items.length;
+  const requested = items.filter((i) => i.demoState === 'REQUESTED').length;
+  const demoAvailable = items.filter((i) => i.demoState === 'DEMO_AVAILABLE').length;
+  const demoMissing = items.filter((i) => i.demoState === 'DEMO_MISSING').length;
+  return { total, requested, demoAvailable, demoMissing };
+}
+
+/**
+ * Returns badge configuration and icon for a checklist item's demo state
+ */
+export function getChecklistStateBadgeConfig(state: RequestedRecordDemoState): {
+  label: string;
+  variant: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  icon: string;
+} {
+  switch (state) {
+    case 'DEMO_AVAILABLE':
+      return {
+        label: 'Available in demo state',
+        variant: 'success',
+        icon: '✓',
+      };
+    case 'REQUESTED':
+      return {
+        label: 'Requested',
+        variant: 'info',
+        icon: '⏳',
+      };
+    case 'DEMO_MISSING':
+      return {
+        label: 'Missing in demo state',
+        variant: 'warning',
+        icon: '○',
+      };
+  }
 }
 
 /**
@@ -342,9 +452,11 @@ export const INITIAL_INSTITUTION_REQUESTS: InstitutionRequest[] = [
 ];
 
 /**
- * Computes dashboard summary metrics from a list of institution requests.
+ * Computes dashboard and applications summary metrics from a list of institution requests.
  */
 export function computeInstitutionMetrics(requests: InstitutionRequest[]): InstitutionMetrics {
+  const totalRequests = requests.length;
+
   const pendingRequests = requests.filter(
     (r) => r.status === 'SENT' || r.status === 'AWAITING_APPLICANT'
   ).length;
@@ -361,11 +473,22 @@ export function computeInstitutionMetrics(requests: InstitutionRequest[]): Insti
     (r) => r.status === 'ACTIVE_ACCESS'
   ).length;
 
+  const sentRequests = requests.filter(
+    (r) => r.status === 'SENT'
+  ).length;
+
+  const expiredRequests = requests.filter(
+    (r) => r.status === 'EXPIRED'
+  ).length;
+
   return {
+    totalRequests,
     pendingRequests,
     activeApplications,
     awaitingApplicantAction,
     activeAuthorizedAccess,
+    sentRequests,
+    expiredRequests,
   };
 }
 

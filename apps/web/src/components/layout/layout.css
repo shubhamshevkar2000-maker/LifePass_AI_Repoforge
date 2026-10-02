@@ -195,4 +195,17 @@
   .lifepass-header-officer-text {
     display: none;
   }
+
+  /* Responsive Requests Table vs Mobile Cards */
+  .lifepass-table-responsive {
+    display: none !important;
+  }
+
+  .lifepass-mobile-cards {
+    display: flex !important;
+  }
+}
+
+.lifepass-mobile-cards {
+  display: none;
 }

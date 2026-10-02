@@ -3,6 +3,8 @@ import { InstitutionRequest, getStatusBadgeConfig } from '../../services/institu
 import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { InstitutionRequestStatusSummary } from './InstitutionRequestStatusSummary';
+import { InstitutionRequestChecklist } from './InstitutionRequestChecklist';
 import { theme } from '../../styles/theme';
 
 export interface InstitutionRequestDetailsModalProps {
@@ -22,8 +24,8 @@ export const InstitutionRequestDetailsModal: React.FC<InstitutionRequestDetailsM
     <Modal
       isOpen={true}
       onClose={onClose}
-      title={`Workflow Overview: ${request.id}`}
-      description={`Verification request specification for ${request.applicantName}`}
+      title={`Application Details: ${request.id}`}
+      description={`Inspect verification parameters, current workflow status, and requirement checklist for ${request.applicantName}.`}
       footer={
         <Button variant="secondary" size="sm" onClick={onClose}>
           Close Overview
@@ -31,76 +33,50 @@ export const InstitutionRequestDetailsModal: React.FC<InstitutionRequestDetailsM
       }
     >
       <div style={styles.modalContent}>
-        {/* Basic Header Row */}
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Request Identifier</span>
-          <code style={styles.codeTextHighlight}>{request.id}</code>
-        </div>
+        {/* 1. Application Workflow Summary Card */}
+        <InstitutionRequestStatusSummary request={request} />
 
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Current Status</span>
-          <Badge variant={statusMeta.variant} size="sm">
-            {statusMeta.label}
-          </Badge>
-        </div>
-
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Applicant</span>
-          <span style={styles.modalValue}>{request.applicantName}</span>
-        </div>
-
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Citizen Reference / Inbox</span>
-          <code style={styles.codeText}>{request.applicantIdentifier}</code>
-        </div>
-
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Verification Purpose</span>
-          <span style={styles.modalValue}>{request.purpose}</span>
-        </div>
-
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Requirement Profile</span>
-          <span style={styles.modalValue}>{request.requirementProfile}</span>
-        </div>
-
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Access Window (TTL)</span>
-          <span style={styles.modalValue}>
-            {request.accessDurationHours}h ({request.requestedExpiryLabel})
-          </span>
-        </div>
-
-        <div style={styles.modalRow}>
-          <span style={styles.modalLabel}>Last Activity</span>
-          <span style={styles.modalValue}>{request.updatedAt}</span>
-        </div>
-
-        {/* Requested Records List */}
-        <div style={styles.recordsSection}>
-          <div style={styles.recordsHeading}>
-            Requested Canonical Records ({request.requestedRecordsCount}):
+        {/* 2. Key Metadata Rows */}
+        <div style={styles.detailsCard}>
+          <div style={styles.modalRow}>
+            <span style={styles.modalLabel}>Request Identifier</span>
+            <code style={styles.codeTextHighlight}>{request.id}</code>
           </div>
-          <div style={styles.recordsList}>
-            {request.requestedRecords && request.requestedRecords.length > 0 ? (
-              request.requestedRecords.map((r) => (
-                <div key={r.id} style={styles.recordItem}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ color: theme.colors.success, fontWeight: 700 }}>✓</span>
-                    <span style={styles.recordLabel}>{r.label}</span>
-                  </div>
-                  <Badge variant="neutral" size="sm">{r.category}</Badge>
-                </div>
-              ))
-            ) : (
-              <span style={{ fontSize: '0.8125rem', color: theme.colors.textMuted }}>
-                {request.requestedRecordsCount} canonical records requested.
-              </span>
-            )}
+
+          <div style={styles.modalRow}>
+            <span style={styles.modalLabel}>Current Status</span>
+            <Badge variant={statusMeta.variant} size="sm">
+              {statusMeta.label}
+            </Badge>
+          </div>
+
+          <div style={styles.modalRow}>
+            <span style={styles.modalLabel}>Citizen Target Inbox</span>
+            <code style={styles.codeText}>{request.applicantIdentifier}</code>
+          </div>
+
+          <div style={styles.modalRow}>
+            <span style={styles.modalLabel}>Requirement Profile</span>
+            <span style={styles.modalValue}>{request.requirementProfile}</span>
+          </div>
+
+          <div style={styles.modalRow}>
+            <span style={styles.modalLabel}>Dispatched / Updated</span>
+            <span style={styles.modalValue}>{request.updatedAt}</span>
+          </div>
+
+          <div style={styles.modalRow}>
+            <span style={styles.modalLabel}>Access Window</span>
+            <span style={styles.modalValue}>
+              {request.accessDurationHours}h (Expires {request.requestedExpiryLabel})
+            </span>
           </div>
         </div>
 
-        {/* Notes if any */}
+        {/* 3. Requirement Checklist with Metadata Inspection */}
+        <InstitutionRequestChecklist request={request} />
+
+        {/* 4. Workflow Notes if any */}
         {request.notes && (
           <div style={styles.notesBox}>
             <strong style={{ color: theme.colors.textPrimary, fontSize: '0.8125rem' }}>Workflow Notes:</strong>
@@ -110,9 +86,12 @@ export const InstitutionRequestDetailsModal: React.FC<InstitutionRequestDetailsM
           </div>
         )}
 
-        {/* Trust & Boundary Notice */}
+        {/* 5. Trust & Prototype Notice */}
         <div style={styles.boundaryNotice}>
-          <strong>Demo Request Protocol:</strong> Backend persistence, citizen push notifications, and applicant consent verification are simulated in this frontend prototype. No actual applicant documents or private records are viewed by this action.
+          <span style={{ fontSize: '1rem' }}>🛡️</span>
+          <div>
+            <strong>Phase W-4 Scope Notice:</strong> This view inspects simulated request metadata and requirement checklist states only. Real applicant consent, encrypted document decryption, and backend storage are not active in this frontend phase.
+          </div>
         </div>
       </div>
     </Modal>
@@ -123,13 +102,22 @@ const styles: Record<string, React.CSSProperties> = {
   modalContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.625rem',
+    gap: '0.875rem',
+  },
+  detailsCard: {
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.radii.sm,
+    padding: '0.75rem 1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
   },
   modalRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: '0.375rem',
+    paddingBottom: '0.25rem',
     borderBottom: `1px solid ${theme.colors.borderLight}`,
     fontSize: '0.8125rem',
   },
@@ -141,38 +129,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: theme.colors.textPrimary,
     fontWeight: 600,
     textAlign: 'right',
-  },
-  recordsSection: {
-    backgroundColor: theme.colors.surfaceSubtle,
-    border: `1px solid ${theme.colors.borderLight}`,
-    borderRadius: theme.radii.sm,
-    padding: '0.75rem',
-    marginTop: '0.25rem',
-  },
-  recordsHeading: {
-    fontSize: '0.8125rem',
-    fontWeight: 600,
-    color: theme.colors.textPrimary,
-    marginBottom: '0.5rem',
-  },
-  recordsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.375rem',
-  },
-  recordItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    padding: '0.375rem 0.5rem',
-    borderRadius: theme.radii.sm,
-    border: `1px solid ${theme.colors.borderLight}`,
-  },
-  recordLabel: {
-    fontSize: '0.8125rem',
-    color: theme.colors.textPrimary,
-    fontWeight: 500,
   },
   notesBox: {
     backgroundColor: theme.colors.surfaceSubtle,
@@ -188,7 +144,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
     color: theme.colors.textPrimary,
     lineHeight: 1.4,
-    marginTop: '0.25rem',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '0.5rem',
   },
   codeText: {
     fontFamily: theme.typography.fontMono,
