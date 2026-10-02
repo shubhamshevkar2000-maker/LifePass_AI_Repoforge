@@ -38,15 +38,19 @@ TASK_MATCHING_RULES: Dict[str, Tuple[List[str], List[str]]] = {
 
 # Prompt injection markers to strip / ignore when interpreting
 PROMPT_INJECTION_MARKERS = [
+    r"system\s+override",
     r"ignore\s+(?:all\s+)?prior\s+instructions",
     r"ignore\s+(?:all\s+)?previous\s+instructions",
     r"grant\s+(?:me\s+)?(?:admin\s+)?access",
     r"mark\s+(?:me|this)?\s*(?:as)?\s*verified",
+    r"approve\s+access",
     r"set\s+readiness\s*(?:to|=)?\s*100%?",
     r"become\s+admin",
     r"elevate\s+role",
     r"override\s+system",
-    r"bypass\s+(?:rls|security|policy)",
+    r"bypass\s+(?:rls|security|policy|consent)",
+    r"change\s+user_id",
+    r"ignore\s+consent",
 ]
 
 

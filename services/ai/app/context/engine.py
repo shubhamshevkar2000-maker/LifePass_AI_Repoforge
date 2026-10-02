@@ -144,7 +144,10 @@ class LifeStageContextEngine:
         raw_type = data.get("task_type", "unknown_task")
         canonical_info = get_canonical_task_info(raw_type)
 
-        raw_conf = float(data.get("confidence", 0.5))
+        try:
+            raw_conf = float(data.get("confidence", 0.5))
+        except (ValueError, TypeError):
+            raw_conf = 0.5
         confidence = max(0.0, min(1.0, round(raw_conf, 2)))
 
         needs_clarification = bool(

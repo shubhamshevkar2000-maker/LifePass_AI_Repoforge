@@ -26,7 +26,10 @@ def generate_readiness_explanation(request: ExplanationRequest) -> ExplanationRe
             f"Your readiness is {int(request.readiness_percent)}%."
         )
     elif total_missing > 0:
-        missing_names = [m.get("name", m.get("code", "Document")) for m in request.missing]
+        missing_names = [
+            m.get("name") or m.get("requirement_name") or m.get("code") or m.get("requirement_code") or "Document"
+            for m in request.missing
+        ]
         missing_str = ", ".join(missing_names)
         summary = (
             f"You have {total_matched} of the {total_required} required records. "
@@ -40,7 +43,10 @@ def generate_readiness_explanation(request: ExplanationRequest) -> ExplanationRe
 
     # 2. Matched Explanation
     if total_matched > 0:
-        matched_labels = [m.get("name", m.get("code", "Record")) for m in request.matched]
+        matched_labels = [
+            m.get("name") or m.get("requirement_name") or m.get("code") or m.get("requirement_code") or "Record"
+            for m in request.matched
+        ]
         matched_explanation = (
             f"The following required records have been matched: {', '.join(matched_labels)}."
         )
@@ -49,7 +55,10 @@ def generate_readiness_explanation(request: ExplanationRequest) -> ExplanationRe
 
     # 3. Missing Explanation
     if total_missing > 0:
-        missing_labels = [m.get("name", m.get("code", "Record")) for m in request.missing]
+        missing_labels = [
+            m.get("name") or m.get("requirement_name") or m.get("code") or m.get("requirement_code") or "Record"
+            for m in request.missing
+        ]
         missing_explanation = (
             f"The following required documents are still needed to complete your application: "
             f"{', '.join(missing_labels)}."
@@ -60,7 +69,7 @@ def generate_readiness_explanation(request: ExplanationRequest) -> ExplanationRe
     # 4. Action Items
     action_items: List[str] = []
     for item in request.missing:
-        name = item.get("name", item.get("code", "document"))
+        name = item.get("name") or item.get("requirement_name") or item.get("code") or item.get("requirement_code") or "document"
         action_items.append(f"Upload or import your {name}.")
 
     for item in request.attention_needed:

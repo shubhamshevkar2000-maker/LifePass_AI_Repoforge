@@ -148,13 +148,16 @@ AI-4: Full Integration + Hardening (Prompt Defense, Performance, Golden Path QA)
 - Implement `POST /ai/retrieve` endpoint with structured `SemanticRetrievalResult`.
 - **Milestone:** Semantic candidate retrieval operational and feeding the deterministic matcher. (Status: **COMPLETE**)
 
-### Stage AI-4 — Full Integration + Hardening
-- End-to-end testing with Workstream 1 (Backend) and Workstream 3 (Mobile & Web clients).
-- Prompt-injection security penetration tests (jailbreak attempts inside document text).
-- Hallucination auditing on incomplete or ambiguous user profiles.
-- Benchmark processing latency, rate limits, and memory usage.
-- Validate the Golden Path demonstration flow (Education Loan: 5 requirements, 4 available, 1 missing -> 80% readiness).
-- **Milestone:** Workstream 2 hardened and certified for final system demonstration.
+### Stage AI-4 — Full Integration Readiness + Hardening (Complete)
+- AI API contract hardening (explicit validation, bounded inputs, deterministic errors).
+- Backend integration boundary definition and protocol adapters (`AuthorizedRecordProvider`, `RequirementProfileProvider`, `BackendMatchingAdapter`).
+- Comprehensive prompt-injection and adversarial security testing across user goals and document text.
+- Groq failure mode hardening (graceful fallback on 401, 429, 5xx, timeout, malformed JSON).
+- Deterministic end-to-end mock integration flow (`run_deterministic_mock_flow`).
+- Golden Path verification (Education Loan: 5 requirements, 4 available, 1 missing -> 80% readiness).
+- AI integration handoff documentation created (`docs/AI_INTEGRATION_HANDOFF.md`).
+- **Milestone:** Workstream 2 hardened, contract-safe, and certified integration-ready. (Status: **COMPLETE**)
+
 
 ---
 

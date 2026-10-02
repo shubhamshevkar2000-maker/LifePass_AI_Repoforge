@@ -87,6 +87,8 @@ class GroqClient:
                     return None, "GROQ_AUTHENTICATION_FAILED"
                 elif response.status_code == 429:
                     return None, "GROQ_RATE_LIMITED"
+                elif response.status_code >= 500:
+                    return None, "GROQ_SERVER_ERROR"
                 else:
                     return None, f"GROQ_HTTP_{response.status_code}"
 
