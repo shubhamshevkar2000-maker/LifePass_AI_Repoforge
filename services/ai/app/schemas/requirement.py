@@ -41,6 +41,20 @@ class RequirementProfileResult(BaseModel):
     requirements: List[RequirementItemResult] = Field(default_factory=list, description="Array of requirement items")
 
 
+from enum import Enum
+
+
+class MatchStatus(str, Enum):
+    """
+    Status of candidate retrieval matching for a requirement item.
+    Never uses authoritative terms like VERIFIED, AUTHENTIC, or APPROVED.
+    """
+    CANDIDATE = "CANDIDATE"
+    NO_CANDIDATES = "NO_CANDIDATES"
+    NEEDS_REVIEW = "NEEDS_REVIEW"
+    RETRIEVAL_ERROR = "RETRIEVAL_ERROR"
+
+
 class CandidateRecord(BaseModel):
     """
     Candidate record discovered during semantic/vector search in user's records.
@@ -51,6 +65,26 @@ class CandidateRecord(BaseModel):
     category: str = Field(..., description="Category of the record")
     similarity_score: float = Field(..., ge=0.0, le=1.0, description="FAISS cosine/inner product similarity score")
     matched_requirement_code: str = Field(..., description="Requirement code candidate is mapped to")
+    label: Optional[str] = Field(default=None, description="Human-readable label of the record")
+    relevance_explanation: Optional[str] = Field(default=None, description="Explanation of why this candidate was retrieved")
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Observable metadata of the candidate record")
+
+
+class RequirementRetrievalResult(BaseModel):
+    """Retrieval result for an individual requirement item."""
+    requirement_code: str = Field(..., description="Requirement code e.g. ID_PROOF")
+    document_type: str = Field(..., description="Target canonical document type")
+    label: str = Field(..., description="Human-readable requirement label")
+    candidates: List[CandidateRecord] = Field(default_factory=list, description="Discovered candidate records")
+    match_status: MatchStatus = Field(default=MatchStatus.CANDIDATE, description="Retrieval status")
+    explanation: Optional[str] = Field(default=None, description="Grounded explanation of candidate relevance or gap")
+
+
+class SemanticRetrievalRequest(BaseModel):
+    """Input to POST /ai/retrieve."""
+    user_id: UUID = Field(..., description="Authenticated user UUID whose records are eligible for candidate search")
+    task_code: str = Field(..., min_length=1, max_length=100, description="Target canonical task code e.g. education_loan")
+    top_k: int = Field(default=5, ge=1, le=50, description="Max candidate records per requirement")
 
 
 class SemanticRetrievalResult(BaseModel):
@@ -59,3 +93,6 @@ class SemanticRetrievalResult(BaseModel):
     user_id: UUID = Field(..., description="User UUID")
     candidates: List[CandidateRecord] = Field(default_factory=list, description="Retrieved candidate records")
     retrieval_count: int = Field(..., description="Number of candidates evaluated")
+    requirement_results: List[RequirementRetrievalResult] = Field(default_factory=list, description="Itemized requirement retrieval results")
+    overall_status: MatchStatus = Field(default=MatchStatus.CANDIDATE, description="Overall retrieval candidate status")
+

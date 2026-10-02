@@ -140,12 +140,13 @@ AI-4: Full Integration + Hardening (Prompt Defense, Performance, Golden Path QA)
 - Implement `POST /ai/explain` translating deterministic matching results into concise natural language summaries.
 - **Milestone:** Intent parsing, requirement retrieval, and explanation operational with Pydantic validation and error handling. (Status: **COMPLETE**)
 
-### Stage AI-3 — Semantic Retrieval + Matching Assistance
+### Stage AI-3 — Semantic Retrieval + Matching Assistance (Complete)
 - Configure FAISS vector store for local similarity indexing.
 - Generate text embeddings for requirement definitions and extracted document summaries.
-- Implement candidate discovery pipeline matching user records against requirement profiles.
+- Implement candidate discovery pipeline matching user records against requirement profiles with deterministic tenant isolation.
 - Interface with Workstream 1's deterministic matching engine (`POST /matching/evaluate`), passing candidate sets for rule evaluation.
-- **Milestone:** Semantic candidate retrieval operational and feeding the deterministic matcher.
+- Implement `POST /ai/retrieve` endpoint with structured `SemanticRetrievalResult`.
+- **Milestone:** Semantic candidate retrieval operational and feeding the deterministic matcher. (Status: **COMPLETE**)
 
 ### Stage AI-4 — Full Integration + Hardening
 - End-to-end testing with Workstream 1 (Backend) and Workstream 3 (Mobile & Web clients).

@@ -30,6 +30,9 @@ from app.schemas.requirement import (
     RequirementProfileResult,
     CandidateRecord,
     SemanticRetrievalResult,
+    MatchStatus,
+    RequirementRetrievalResult,
+    SemanticRetrievalRequest,
 )
 from app.schemas.explanation import (
     ExplanationRequest,
@@ -63,6 +66,9 @@ __all__ = [
     "RequirementProfileResult",
     "CandidateRecord",
     "SemanticRetrievalResult",
+    "MatchStatus",
+    "RequirementRetrievalResult",
+    "SemanticRetrievalRequest",
     "ExplanationRequest",
     "ExplanationResult",
     "TaskContext",
@@ -70,4 +76,5 @@ __all__ = [
     "LifeStageContextRequest",
     "LifeStageContextResult",
 ]
+
 
