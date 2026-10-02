@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -10,6 +10,9 @@ export interface UploadRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddRecord: (record: VaultRecord) => void;
+  initialCategory?: RecordCategory;
+  initialRecordType?: string;
+  initialName?: string;
 }
 
 const CATEGORIES: RecordCategory[] = [
@@ -28,10 +31,13 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
   isOpen,
   onClose,
   onAddRecord,
+  initialCategory = 'Education',
+  initialRecordType = '',
+  initialName = '',
 }) => {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState<RecordCategory>('Education');
-  const [recordType, setRecordType] = useState('');
+  const [name, setName] = useState(initialName);
+  const [category, setCategory] = useState<RecordCategory>(initialCategory);
+  const [recordType, setRecordType] = useState(initialRecordType);
   const [description, setDescription] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +45,15 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
   const [processingStep, setProcessingStep] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync initial values when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (initialCategory) setCategory(initialCategory);
+      if (initialRecordType) setRecordType(initialRecordType);
+      if (initialName) setName(initialName);
+    }
+  }, [isOpen, initialCategory, initialRecordType, initialName]);
 
   const resetForm = () => {
     setName('');

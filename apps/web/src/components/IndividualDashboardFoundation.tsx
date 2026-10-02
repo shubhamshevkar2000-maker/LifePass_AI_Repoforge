@@ -5,6 +5,7 @@ import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { theme } from '../styles/theme';
 import { RecordVaultView } from './vault/RecordVaultView';
+import { AskLifePassView } from './task/AskLifePassView';
 import {
   VaultRecord,
   INITIAL_DEMO_RECORDS,
@@ -13,7 +14,7 @@ import {
 
 export const IndividualDashboardFoundation: React.FC = () => {
   const { user, signOut } = useInstitutionAuth();
-  const [taskInput, setTaskInput] = useState('I need to apply for university admission');
+  const [taskInput, setTaskInput] = useState('I want to apply for university admission');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'education' | 'employment' | 'finance' | 'healthcare'>('all');
   const [selectedTask, setSelectedTask] = useState<'college' | 'loan' | 'job' | 'hospital'>('college');
   const [activeNav, setActiveNav] = useState<'home' | 'records' | 'ask' | 'permissions' | 'profile'>('home');
@@ -27,19 +28,17 @@ export const IndividualDashboardFoundation: React.FC = () => {
   };
 
   const handleNavigateHomeForTask = (record: VaultRecord) => {
-    setActiveNav('home');
+    setActiveNav('ask');
     if (record.category === 'Education') {
-      setSelectedCategory('education');
-      setSelectedTask('college');
+      setTaskInput('I want to apply for university admission');
     } else if (record.category === 'Finance') {
-      setSelectedCategory('finance');
-      setSelectedTask('loan');
+      setTaskInput('I need to apply for an educational loan for college');
     } else if (record.category === 'Employment') {
-      setSelectedCategory('employment');
-      setSelectedTask('job');
+      setTaskInput('I am applying for a software engineering job');
     } else if (record.category === 'Healthcare') {
-      setSelectedCategory('healthcare');
-      setSelectedTask('hospital');
+      setTaskInput('I need to arrange hospital admission and insurance');
+    } else {
+      setTaskInput('I want to apply for university admission');
     }
   };
 
@@ -181,6 +180,13 @@ export const IndividualDashboardFoundation: React.FC = () => {
             onAddRecord={handleAddRecord}
             onNavigateHomeForTask={handleNavigateHomeForTask}
           />
+        ) : activeNav === 'ask' ? (
+          <AskLifePassView
+            initialTaskInput={taskInput}
+            records={records}
+            onAddRecord={handleAddRecord}
+            onNavigateVault={() => setActiveNav('records')}
+          />
         ) : (
           <>
             {/* Hero Section */}
@@ -213,18 +219,10 @@ export const IndividualDashboardFoundation: React.FC = () => {
                 size="md"
                 style={styles.askButton}
                 onClick={() => {
-                  if (taskInput.toLowerCase().includes('loan')) {
-                    setSelectedTask('loan');
-                  } else if (taskInput.toLowerCase().includes('job')) {
-                    setSelectedTask('job');
-                  } else if (taskInput.toLowerCase().includes('hospital')) {
-                    setSelectedTask('hospital');
-                  } else {
-                    setSelectedTask('college');
-                  }
+                  setActiveNav('ask');
                 }}
               >
-                Ask LifePass AI
+                Check Requirements
               </Button>
             </div>
             <div style={styles.aiHintText}>
