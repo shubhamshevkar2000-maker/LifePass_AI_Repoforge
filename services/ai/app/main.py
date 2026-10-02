@@ -12,12 +12,15 @@ from app.schemas.requirement import (
 )
 from app.schemas.context import LifeStageContextRequest, LifeStageContextResult
 from app.schemas.explanation import ExplanationRequest, ExplanationResult
+from app.api.endpoints import router as ai_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description="LifePass AI Document Intelligence & Intent Service Foundation",
 )
+
+app.include_router(ai_router, prefix="/api")
 
 @app.get("/")
 def root():

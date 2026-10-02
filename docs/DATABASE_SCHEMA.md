@@ -36,6 +36,7 @@
 ### institution_members
 - `id uuid PK`
 - `institution_id uuid FK`
+- `requester_user_id uuid FK`
 - `user_id uuid FK`
 - `role text`
 - `status text`
@@ -104,6 +105,7 @@ The requirement knowledge base is controlled/versioned data. The LLM must not in
 ### access_requests
 - `id uuid PK`
 - `institution_id uuid FK`
+- `requester_user_id uuid FK`
 - `user_id uuid FK`
 - `requirement_profile_id uuid FK`
 - `purpose text`
@@ -125,6 +127,7 @@ The requirement knowledge base is controlled/versioned data. The LLM must not in
 - `request_id uuid FK`
 - `user_id uuid FK`
 - `institution_id uuid FK`
+- `requester_user_id uuid FK`
 - `purpose text`
 - `status text`
 - `granted_at timestamptz nullable`
