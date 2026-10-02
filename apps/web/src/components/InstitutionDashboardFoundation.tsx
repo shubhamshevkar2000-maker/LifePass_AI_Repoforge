@@ -1,8 +1,80 @@
 import React from 'react';
 import { useInstitutionAuth } from '../context/InstitutionAuthContext';
 
-export const InstitutionDashboardFoundation: React.FC = () => {
+export interface InstitutionDashboardFoundationProps {
+  embedded?: boolean;
+}
+
+export const InstitutionDashboardFoundation: React.FC<InstitutionDashboardFoundationProps> = ({
+  embedded = false,
+}) => {
   const { user, activeMembership, allMemberships, signOut } = useInstitutionAuth();
+
+  const content = (
+    <div style={embedded ? styles.embeddedContent : styles.main}>
+      <div style={styles.grid}>
+        {/* Card 1: Verified Identity */}
+        <div style={styles.card}>
+          <h3 style={styles.cardTitle}>Institution Officer Credentials</h3>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>Phone / Identity</span>
+            <span style={styles.fieldValue}>{user?.phone || 'Verified Identity'}</span>
+          </div>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>User ID</span>
+            <span style={styles.fieldValueMono}>{user?.id}</span>
+          </div>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>Membership ID</span>
+            <span style={styles.fieldValueMono}>{activeMembership?.id}</span>
+          </div>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>Membership Status</span>
+            <span style={styles.statusActive}>{activeMembership?.status?.toUpperCase()}</span>
+          </div>
+        </div>
+
+        {/* Card 2: Security & RLS Isolation */}
+        <div style={styles.card}>
+          <h3 style={styles.cardTitle}>Authorization & Boundary Enforcement</h3>
+          <p style={styles.cardDesc}>
+            In accordance with <code>DATABASE_SCHEMA.md</code> and <code>SECURITY_CONSENT.md</code>:
+          </p>
+          <ul style={styles.list}>
+            <li>Institution access is scoped strictly to data owned by this institution.</li>
+            <li>RLS prevents accessing citizen data without explicit consent.</li>
+            <li>Client-side role promotion is blocked by PostgreSQL constraints.</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Phase Status Banner */}
+      <div style={styles.banner}>
+        <div style={styles.bannerTitle}>Phase W-1 — App Shell & UI Foundation Active</div>
+        <p style={styles.bannerText}>
+          Institution phone OTP authentication, database membership verification, and responsive navigation shell are established.
+          Workflow creation, applicant requests, and consented record packages will be connected in Phase W-3+.
+        </p>
+      </div>
+
+      {allMemberships.length > 1 && (
+        <div style={styles.multiOrg}>
+          <h4 style={styles.multiOrgTitle}>Other Associated Institutions</h4>
+          <div style={styles.multiOrgList}>
+            {allMemberships.map((m) => (
+              <div key={m.id} style={styles.multiOrgItem}>
+                {m.institution?.name} ({m.role})
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
 
   return (
     <div style={styles.container}>
@@ -21,65 +93,7 @@ export const InstitutionDashboardFoundation: React.FC = () => {
         </button>
       </header>
 
-      <main style={styles.main}>
-        <div style={styles.grid}>
-          {/* Card 1: Verified Identity */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Institution Officer Credentials</h3>
-            <div style={styles.fieldRow}>
-              <span style={styles.fieldLabel}>Phone / Identity</span>
-              <span style={styles.fieldValue}>{user?.phone || 'Verified Identity'}</span>
-            </div>
-            <div style={styles.fieldRow}>
-              <span style={styles.fieldLabel}>User ID</span>
-              <span style={styles.fieldValueMono}>{user?.id}</span>
-            </div>
-            <div style={styles.fieldRow}>
-              <span style={styles.fieldLabel}>Membership ID</span>
-              <span style={styles.fieldValueMono}>{activeMembership?.id}</span>
-            </div>
-            <div style={styles.fieldRow}>
-              <span style={styles.fieldLabel}>Membership Status</span>
-              <span style={styles.statusActive}>{activeMembership?.status?.toUpperCase()}</span>
-            </div>
-          </div>
-
-          {/* Card 2: Security & RLS Isolation */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Authorization & Boundary Enforcement</h3>
-            <p style={styles.cardDesc}>
-              In accordance with <code>DATABASE_SCHEMA.md</code> and <code>SECURITY_CONSENT.md</code>:
-            </p>
-            <ul style={styles.list}>
-              <li>Institution access is scoped strictly to data owned by this institution.</li>
-              <li>RLS prevents accessing citizen data without explicit consent.</li>
-              <li>Client-side role promotion is blocked by PostgreSQL constraints.</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Phase 1 Status Banner */}
-        <div style={styles.banner}>
-          <div style={styles.bannerTitle}>Phase 1 — Institution Authentication Foundation Complete</div>
-          <p style={styles.bannerText}>
-            Institution phone OTP authentication, database membership verification, and RLS boundaries are established.
-            Workflow creation, applicant requests, and consented record packages will be implemented in Phase 8.
-          </p>
-        </div>
-
-        {allMemberships.length > 1 && (
-          <div style={styles.multiOrg}>
-            <h4 style={styles.multiOrgTitle}>Other Associated Institutions</h4>
-            <div style={styles.multiOrgList}>
-              {allMemberships.map((m) => (
-                <div key={m.id} style={styles.multiOrgItem}>
-                  {m.institution?.name} ({m.role})
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
+      <main>{content}</main>
     </div>
   );
 };
@@ -140,6 +154,10 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '2rem',
     maxWidth: '1000px',
     margin: '0 auto',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  embeddedContent: {
     width: '100%',
     boxSizing: 'border-box',
   },

@@ -3,6 +3,8 @@ import { InstitutionAuthProvider, useInstitutionAuth } from './context/Instituti
 import { InstitutionLoginView } from './components/InstitutionLoginView';
 import { AccessDeniedView } from './components/AccessDeniedView';
 import { InstitutionDashboardFoundation } from './components/InstitutionDashboardFoundation';
+import { AppLayout } from './components/layout/AppLayout';
+import { Spinner } from './components/ui/Spinner';
 
 const WebRouter: React.FC = () => {
   const { session, isMemberVerified, isLoading } = useInstitutionAuth();
@@ -10,7 +12,7 @@ const WebRouter: React.FC = () => {
   if (isLoading) {
     return (
       <div style={styles.centerContainer}>
-        <div style={styles.spinner} />
+        <Spinner size="lg" label="Verifying Institution Credentials..." />
         <p style={styles.loadingText}>Verifying Institution Credentials...</p>
       </div>
     );
@@ -34,8 +36,12 @@ const WebRouter: React.FC = () => {
     );
   }
 
-  // Authenticated and verified active institution member -> Show Foundation Dashboard
-  return <InstitutionDashboardFoundation />;
+  // Authenticated and verified active institution member -> Mount inside AppLayout
+  return (
+    <AppLayout>
+      <InstitutionDashboardFoundation embedded />
+    </AppLayout>
+  );
 };
 
 export default function App() {
@@ -56,14 +62,6 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     padding: '1.5rem',
     boxSizing: 'border-box',
-  },
-  spinner: {
-    width: '2.5rem',
-    height: '2.5rem',
-    border: '3px solid #1F2937',
-    borderTopColor: '#38BDF8',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
   },
   loadingText: {
     marginTop: '1rem',
