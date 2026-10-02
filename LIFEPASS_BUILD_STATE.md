@@ -199,12 +199,12 @@ Documents move through strictly defined processing states:
 | Database (PostgreSQL / RLS) | VERIFIED | `supabase/migrations/20261001000000_phase1_initial_schema.sql` & `test_phase1_runtime_rls.py` | `profiles`, `institutions`, `institution_members`, and RLS policies verified at runtime against running PostgreSQL engine. |
 | Storage (Supabase Storage) | NOT_STARTED | No storage config | Planned for Phase 2 |
 | Document Pipeline | NOT_STARTED | No OCR/parser scripts | Planned for Phase 5 |
-| AI Service (Python / FastAPI) | PARTIAL | `services/ai/app/main.py` health endpoint | Foundation initialized. AI models NOT_STARTED. |
-| RAG / Knowledge Base | NOT_STARTED | No FAISS or prompt files | Planned for Phase 3 & 4 |
-| Requirement Matching Engine | NOT_STARTED | No matching rules | Planned for Phase 6 |
+| AI Service (Python / FastAPI) | VERIFIED (AI-0) | `services/ai/app/schemas/`, `test_ai_contracts.py`, `docs/AI_WORKSTREAM_PLAN.md` | AI-0 Audit & Contract Foundation complete; 18 contract tests passing. Pipeline implementation scheduled for AI-1+. |
+| RAG / Knowledge Base | NOT_STARTED | No FAISS or prompt files | Planned for Stage AI-3 |
+| Requirement Matching Engine | NOT_STARTED | No matching rules | Planned for Stage AI-3 & Phase 6 |
 | Consent & Access Management | NOT_STARTED | No consent workflows | Planned for Phase 7 |
 | Audit Logging | NOT_STARTED | No audit schema/events | Planned for Phase 1 & 7 |
-| Automated Testing & QA | VERIFIED | 35 automated tests passing in `services/ai/tests` | 17 runtime PostgreSQL & Auth tests, 16 static/simulation tests, 2 service health tests VERIFIED. |
+| Automated Testing & QA | VERIFIED | 36 automated tests passing in `services/ai/tests` | 18 AI contract tests, 16 static/simulation tests, 2 service health tests VERIFIED. |
 
 ---
 
@@ -559,4 +559,65 @@ Phase 1 implementation, migrations, RLS policies, automated runtime verification
    - Base branch: `main` (Always pulled fresh)
    - Workstream branches: `feature/backend`, `feature/ai`, `feature/client`, `feature/qa`
    - Merge discipline: Small feature PRs with automated tests passing against the shared baseline.
+
+---
+
+## 29. Workstream 2 (AI + Document Intelligence) — Stage AI-0 Report
+
+### 1. Stage Identification & Scope
+- **Workstream:** Workstream 2 — AI + Document Intelligence
+- **Stage:** AI-0 — AI Workstream Audit + Contract Foundation
+- **Branch:** `feature/ai`
+- **Status:** **AI-0 COMPLETE**
+- **Objective:** Audit existing repository and approved specifications, define typed AI contract schemas, establish workstream plan and backend requests, and establish test foundation without implementing heavy AI/OCR pipelines or altering backend database ownership.
+
+### 2. Repository & Specification Audit Findings
+- **FastAPI Core:** `services/ai/app/main.py` operating on Python 3.11.9 with `GET /` and `GET /health`.
+- **Environment & Config:** `services/ai/app/core/config.py` configured with `Settings` for Groq model (`llama3-70b-8192`) and Supabase parameters.
+- **Dependency Discipline:** No unnecessary or speculative packages installed; maintained clean foundation (`fastapi`, `uvicorn`, `pydantic`, `pydantic-settings`, `httpx`, `pytest`).
+- **AI Responsibilities Extracted:**
+  - Intent understanding (`POST /ai/intent`) -> schema-validated task, domain, institution type, confidence.
+  - Life-stage understanding -> mapping user goals to canonical task codes.
+  - Requirement retrieval -> querying controlled knowledge base; never inventing requirements.
+  - OCR & text extraction -> extracting observable text without making authenticity claims.
+  - Document classification -> classifying into `DocumentType` with confidence scoring.
+  - Metadata extraction -> extracting observable fields (holder, issuer, dates, doc numbers).
+  - Semantic retrieval -> FAISS candidate discovery feeding deterministic backend matcher.
+  - Natural language explanation (`POST /ai/explain`) -> summarizing deterministic readiness facts.
+  - Prompt-injection defense -> treating document text strictly as untrusted DATA inside system fences.
+- **Hard AI Boundaries Enforced:**
+  - AI NEVER sets legal authenticity (`OCR looks correct != document is authentic`).
+  - AI NEVER claims issuer verification without authoritative external response.
+  - AI NEVER grants access, alters consent, or bypasses RLS.
+  - AI NEVER calculates final readiness scores (backend deterministic logic).
+  - AI NEVER invents records, requirements, or integrations.
+
+### 3. Deliverables Created in Stage AI-0
+1. **AI Workstream Plan ([`docs/AI_WORKSTREAM_PLAN.md`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/docs/AI_WORKSTREAM_PLAN.md)):**
+   - Detailed plan covering current baseline, approved responsibilities, hard boundaries, stages AI-0 to AI-4, cross-workstream dependencies, and prompt-injection defenses.
+2. **Backend Request Log ([`docs/AI_BACKEND_REQUESTS.md`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/docs/AI_BACKEND_REQUESTS.md)):**
+   - Formal requests to Backend Owner Nidhi for `public.record_extractions` migration, signed storage read URLs, requirement profile seed data, and `POST /matching/evaluate` endpoint. Zero direct DB changes made by AI workstream.
+3. **Typed AI Contracts Package ([`services/ai/app/schemas/`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/schemas)):**
+   - `common.py`: Processing states, external verification status, error codes, and response envelopes.
+   - `intent.py`: Intent domain, institution type, intent request, and structured intent result.
+   - `document.py`: Document categories, types, classification result, observable metadata, and processing result.
+   - `requirement.py`: Requirement profile, requirement items, candidate records, and semantic retrieval results.
+   - `explanation.py`: Explanation request and structured natural language explanation result.
+4. **Contract Verification Suite ([`services/ai/tests/test_ai_contracts.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/tests/test_ai_contracts.py)):**
+   - 18 unit tests validating serialization, deserialization, enum constraints, confidence bounds (0.0 - 1.0), readiness bounds (0 - 100), and error envelopes.
+
+### 4. Verification & Test Execution Summary
+- **AI Contract Tests (`test_ai_contracts.py`):** **18/18 PASSED** (0.12s)
+- **AI Service Health Tests (`test_health.py`):** **2/2 PASSED**
+- **Static Schema & Policy Simulation (`test_phase1_schema_security.py`):** **16/16 PASSED**
+- **Total Passing AI Workstream Tests:** **36/36 PASSED**
+- **Frontend Workspace Integrity:**
+  - `@lifepass/shared`: Build exit 0
+  - `@lifepass/mobile`: `tsc --noEmit` exit 0 (0 errors)
+  - `@lifepass/web`: `tsc && vite build` built production bundle in 770ms (exit 0)
+
+### 5. Next Stage Handoff
+- **Next Stage:** **AI-1 — Document Intelligence Foundation**
+- **Prerequisites Met:** AI-0 contracts defined, backend requests logged, test suite verified.
+- **Scope for AI-1:** Install document processing libraries (`PyMuPDF`, `pytesseract`/`easyocr`), implement file validation, OCR text extraction, rule-assisted classification, and observable metadata extraction producing `DocumentProcessingResult`.
 
