@@ -135,7 +135,7 @@ export const InstitutionLoginView: React.FC = () => {
         style={{
           background: 'none',
           border: 'none',
-          color: '#0EA5E9',
+          color: '#38BDF8',
           fontSize: '0.8125rem',
           cursor: 'pointer',
           padding: 0,

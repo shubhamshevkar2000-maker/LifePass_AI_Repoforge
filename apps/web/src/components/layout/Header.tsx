@@ -41,16 +41,17 @@ export const Header: React.FC<HeaderProps> = ({
               width: '28px',
               height: '28px',
               borderRadius: '0.375rem',
-              backgroundColor: '#0284C7',
+              background: 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 800,
-              fontSize: '0.875rem',
-              color: '#F9FAFB',
+              fontSize: '0.8125rem',
+              color: '#090D16',
+              boxShadow: '0 0 10px rgba(56, 189, 248, 0.3)',
             }}
           >
-            L
+            LP
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -62,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
                   color: '#F9FAFB',
                 }}
               >
-                LifePass
+                LifePass AI
               </span>
               <Badge variant="info" size="sm">
                 PORTAL

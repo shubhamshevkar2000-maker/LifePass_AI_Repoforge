@@ -247,7 +247,7 @@ export const IndividualDashboardFoundation: React.FC = () => {
                       <div style={styles.checkItemName}>Provisional University Admission Letter</div>
                       <div style={styles.checkItemDetail}>Missing: No record found matching admission letter</div>
                     </div>
-                    <Badge variant="warning" size="sm">
+                    <Badge variant="danger" size="sm">
                       MISSING
                     </Badge>
                   </div>
@@ -361,13 +361,14 @@ const styles: Record<string, React.CSSProperties> = {
     width: '32px',
     height: '32px',
     borderRadius: '0.5rem',
-    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+    background: 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#FFFFFF',
+    color: '#090D16',
     fontWeight: 800,
     fontSize: '0.875rem',
+    boxShadow: '0 0 12px rgba(56, 189, 248, 0.3)',
   },
   brandTitle: {
     fontSize: '1.125rem',
@@ -436,7 +437,7 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'absolute',
     left: '0.875rem',
     fontSize: '1rem',
-    color: '#10B981',
+    color: '#38BDF8',
   },
   taskTextInput: {
     width: '100%',
@@ -491,8 +492,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
   },
   taskCardSelected: {
-    borderColor: '#10B981',
-    backgroundColor: '#0B1E19',
+    borderColor: '#38BDF8',
+    backgroundColor: '#0C1E2E',
   },
   taskCardTop: {
     display: 'flex',
@@ -522,7 +523,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
   },
   readinessTag: {
-    color: '#10B981',
+    color: '#34D399',
     fontWeight: 700,
   },
   itemCount: {
@@ -530,7 +531,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   detailCard: {
     backgroundColor: '#111827',
-    border: '1px solid #10B981',
+    border: '1px solid #1F2937',
     borderRadius: '0.75rem',
     padding: '1.5rem',
   },
@@ -585,7 +586,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: '20px',
     borderRadius: '50%',
     backgroundColor: '#064E3B',
-    color: '#10B981',
+    color: '#34D399',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -597,8 +598,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.75rem',
-    backgroundColor: '#271B0B',
-    border: '1px solid #78350F',
+    backgroundColor: '#200D11',
+    border: '1px solid #7F1D1D',
     borderRadius: '0.5rem',
     padding: '0.75rem 1rem',
   },
@@ -606,8 +607,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: '20px',
     height: '20px',
     borderRadius: '50%',
-    backgroundColor: '#78350F',
-    color: '#FBBF24',
+    backgroundColor: '#450A0A',
+    color: '#F87171',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
