@@ -93,11 +93,11 @@ export const RecordVaultView: React.FC<RecordVaultViewProps> = ({
           <div style={styles.headerTitleLine}>
             <h1 style={styles.title}>Personal Record Vault</h1>
             <Badge variant="info" size="md">
-              ENCRYPTED SOVEREIGN VAULT
+              DEMO VAULT
             </Badge>
           </div>
           <p style={styles.subtitle}>
-            Your encrypted personal documents. Only you decide which organizations may verify or inspect them.
+            Manage and organize your documents for task readiness checks and permissions.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export const RecordVaultView: React.FC<RecordVaultViewProps> = ({
           <div style={{ ...styles.metricValue, color: theme.colors.successText }}>
             {summary.verified}
           </div>
-          <span style={styles.metricSub}>Digitally signed & pre-validated</span>
+          <span style={styles.metricSub}>Marked verified in demo state</span>
         </div>
 
         <div style={styles.metricCard}>
@@ -157,7 +157,7 @@ export const RecordVaultView: React.FC<RecordVaultViewProps> = ({
           <div style={{ ...styles.metricValue, color: theme.colors.warningText }}>
             {summary.pending}
           </div>
-          <span style={styles.metricSub}>Awaiting issuer or match confirmation</span>
+          <span style={styles.metricSub}>Pending review or match</span>
         </div>
 
         <div style={styles.metricCard}>
@@ -262,7 +262,7 @@ export const RecordVaultView: React.FC<RecordVaultViewProps> = ({
                 {/* Card Meta Details */}
                 <div style={styles.recordMetaBody}>
                   <div style={styles.metaRow}>
-                    <span style={styles.metaKey}>Source / Issuer:</span>
+                    <span style={styles.metaKey}>Source:</span>
                     <span style={styles.metaVal}>{record.source}</span>
                   </div>
 

@@ -38,7 +38,7 @@ export const RecordDetailsModal: React.FC<RecordDetailsModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Record Details"
-      description="Inspect verification status, issuer provenance, and encryption metadata."
+      description="View record details, source information, and document metadata."
       maxWidth="620px"
       footer={
         <div style={styles.footerContainer}>
@@ -88,7 +88,7 @@ export const RecordDetailsModal: React.FC<RecordDetailsModalProps> = ({
           </div>
 
           <div style={styles.metaItem}>
-            <span style={styles.metaLabel}>Issuing Authority / Source</span>
+            <span style={styles.metaLabel}>Source</span>
             <span style={styles.metaValue}>{record.source}</span>
           </div>
 
@@ -123,22 +123,20 @@ export const RecordDetailsModal: React.FC<RecordDetailsModalProps> = ({
           </div>
         )}
 
-        {/* Security & Access Banner */}
+        {/* Consent & Access Control Banner */}
         <div style={styles.securityBanner}>
           <div style={styles.securityIcon}>🛡️</div>
           <div>
-            <strong style={styles.securityTitle}>Client-Side Encryption & Consent Boundary</strong>
+            <strong style={styles.securityTitle}>Consent & Access Control</strong>
             <p style={styles.securityText}>
-              This record is stored in your personal vault. Third parties and institutions cannot access,
-              inspect, or verify this document without your explicit, scoped consent for each requested task.
+              Organizations cannot access your records without your explicit, scoped consent for each task.
             </p>
           </div>
         </div>
 
-        {/* Demo Disclaimer */}
+        {/* Demo Notice */}
         <div style={styles.demoDisclaimer}>
-          ℹ️ <strong>Demo Notice:</strong> Simulated record metadata for frontend evaluation. No real personal
-          documents or biometric data are transmitted or persisted on any remote server.
+          ℹ️ <strong>Frontend Demo Data:</strong> Verification status and metadata shown here are for demonstration.
         </div>
       </div>
     </Modal>

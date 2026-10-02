@@ -549,7 +549,7 @@ export const IndividualDashboardFoundation: React.FC = () => {
               </Badge>
             </div>
             <p style={styles.summaryDesc}>
-              Personal records stored with end-to-end encryption. Only you decide which organizations may access them.
+              Manage your personal records and decide which organizations may access them.
             </p>
             <div style={styles.vaultCategoryList}>
               <div style={styles.vaultCatItem}>
@@ -648,9 +648,9 @@ export const IndividualDashboardFoundation: React.FC = () => {
                 <div style={styles.activityDot} />
                 <div style={{ flex: 1 }}>
                   <div style={styles.activityText}>
-                    <strong>CBSE Class 12 Marksheet</strong> verified by Issuing Authority
+                    <strong>CBSE Class 12 Marksheet</strong> added to vault
                   </div>
-                  <div style={styles.activityTime}>Yesterday • Cryptographic Signature Validated</div>
+                  <div style={styles.activityTime}>Yesterday • Demo Status Verified</div>
                 </div>
               </div>
 
@@ -668,7 +668,7 @@ export const IndividualDashboardFoundation: React.FC = () => {
                 <div style={styles.activityDot} />
                 <div style={{ flex: 1 }}>
                   <div style={styles.activityText}>
-                    <strong>Vault Backup Snapshot</strong> encrypted with personal key
+                    <strong>Vault Snapshot</strong> saved to session
                   </div>
                   <div style={styles.activityTime}>3 days ago • System Event</div>
                 </div>

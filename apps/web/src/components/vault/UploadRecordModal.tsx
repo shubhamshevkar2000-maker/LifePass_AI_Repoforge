@@ -138,10 +138,10 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
 
     // Start simulated processing
     setIsProcessing(true);
-    setProcessingStep('Preparing your record and calculating client-side hash...');
+    setProcessingStep('Preparing your record...');
 
     setTimeout(() => {
-      setProcessingStep('Applying zero-knowledge encryption wrapper...');
+      setProcessingStep('Adding record to your local demo vault...');
       setTimeout(() => {
         const todayStr = new Intl.DateTimeFormat('en-GB', {
           day: '2-digit',
@@ -176,7 +176,7 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
       isOpen={isOpen}
       onClose={handleClose}
       title="Add Record to Vault"
-      description="Store, encrypt, and manage a new verified document in your personal sovereign vault."
+      description="Add and organize a document in your personal LifePass demo vault."
       maxWidth="580px"
       footer={
         <div style={styles.footerContainer}>
@@ -195,7 +195,7 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
             isLoading={isProcessing}
             disabled={isProcessing}
           >
-            {isProcessing ? 'Adding Record...' : 'Encrypt & Add Record'}
+            {isProcessing ? 'Adding Record...' : 'Add Record'}
           </Button>
         </div>
       }
@@ -322,15 +322,15 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
             style={styles.textarea}
           />
           <span style={styles.hintText}>
-            Personal context notes. Stored encrypted with this document.
+            Personal context notes for your record.
           </span>
         </div>
 
         {/* Disclaimer / In-Memory Session Notice */}
         <div style={styles.disclaimerNotice}>
-          🔒 <strong>Browser-Safe Session Vault:</strong> This frontend evaluation environment encrypts
-          and stores records in memory for session lifetime. Initial status will be set to{' '}
-          <span style={{ fontWeight: 600, color: theme.colors.warningText }}>PENDING</span> for verification.
+          📁 <strong>Frontend Demo Vault:</strong> Records added during this session are stored in local memory
+          for demonstration. Initial status is set to{' '}
+          <span style={{ fontWeight: 600, color: theme.colors.warningText }}>PENDING</span> for verification preview.
         </div>
       </form>
     </Modal>
