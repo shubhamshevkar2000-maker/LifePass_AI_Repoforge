@@ -99,6 +99,11 @@ Institution creates:
 - requirement profile
 - expiry
 
+**Requester Accountability:**
+The system securely identifies the exact institution member who created the request (`requester_user_id`), derived strictly from their authenticated session.
+- The creator must be a valid, active member of the request's institution.
+- Consent-related notifications (such as approval or denial) are sent only to this `requester_user_id` to prevent institution-wide data exposure or broad broadcast spam.
+
 User receives the request and chooses whether to grant access.
 
 ## 8. Denial

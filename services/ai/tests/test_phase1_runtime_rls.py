@@ -42,7 +42,7 @@ def rls_test_env(admin_db_conn):
     """
     Sets up isolated test identities and institutions for RLS testing,
     and cleans them up after each test.
-    
+
     Identities:
     - User A (Alice): Member of Institution One (compliance_officer)
     - User B (Bob): Citizen without any institution membership
@@ -452,7 +452,7 @@ def test_runtime_auth_otp_channel_status():
 def test_runtime_postgrest_anon_isolation():
     """C3: Verifies PostgREST HTTP REST API enforces RLS on anon requests."""
     headers = {"apikey": ANON_KEY}
-    
+
     r_profiles = httpx.get(f"{SUPABASE_URL}/rest/v1/profiles", headers=headers)
     assert r_profiles.status_code == 200
     assert r_profiles.json() == []

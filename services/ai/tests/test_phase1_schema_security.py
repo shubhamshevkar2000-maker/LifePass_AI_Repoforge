@@ -34,7 +34,7 @@ def test_static_profiles_schema_columns(migration_sql):
     table_match = re.search(r"CREATE TABLE IF NOT EXISTS public\.profiles\s*\((.*?)\);", migration_sql, re.DOTALL)
     assert table_match, "public.profiles table definition not found"
     content = table_match.group(1)
-    
+
     assert "id UUID PRIMARY KEY" in content or "id UUID PRIMARY KEY REFERENCES" in content
     assert "REFERENCES auth.users(id)" in content
     assert "full_name TEXT" in content
@@ -48,7 +48,7 @@ def test_static_institutions_schema_columns(migration_sql):
     table_match = re.search(r"CREATE TABLE IF NOT EXISTS public\.institutions\s*\((.*?)\);", migration_sql, re.DOTALL)
     assert table_match, "public.institutions table definition not found"
     content = table_match.group(1)
-    
+
     assert "id UUID PRIMARY KEY" in content
     assert "name TEXT" in content
     assert "type TEXT" in content
@@ -61,7 +61,7 @@ def test_static_institution_members_schema_columns(migration_sql):
     table_match = re.search(r"CREATE TABLE IF NOT EXISTS public\.institution_members\s*\((.*?)\);", migration_sql, re.DOTALL)
     assert table_match, "public.institution_members table definition not found"
     content = table_match.group(1)
-    
+
     assert "id UUID PRIMARY KEY" in content
     assert "institution_id UUID" in content and "REFERENCES public.institutions(id)" in content
     assert "user_id UUID" in content and "REFERENCES auth.users(id)" in content
@@ -82,7 +82,7 @@ def test_static_rls_policies_exist(migration_sql):
     assert 'CREATE POLICY "profiles_insert_own"' in migration_sql
     assert 'CREATE POLICY "profiles_update_own"' in migration_sql
     assert 'CREATE POLICY "profiles_delete_own"' in migration_sql
-    
+
     # Institution policies
     assert 'CREATE POLICY "institutions_select_member"' in migration_sql
     assert 'CREATE POLICY "institution_members_select_own"' in migration_sql
@@ -168,7 +168,7 @@ def test_simulated_scenario_f_institution_member_access_outside_boundary():
     """SIMULATED TEST F: Institution member attempts to access data outside their institution boundary. Expected: REJECTED."""
     user_bank_officer = "officer-uuid-5555"
     memberships = [{"institution_id": "inst-bank-01", "user_id": user_bank_officer, "status": "active"}]
-    
+
     # Can access own institution
     assert simulate_institution_select_policy(user_bank_officer, "inst-bank-01", memberships) is True
     # CANNOT access another institution
@@ -190,14 +190,14 @@ def test_static_secret_scan_client_directories():
         os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../apps/web/src")),
         os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../packages/shared/src")),
     ]
-    
+
     prohibited_patterns = [
         re.compile(r"service_role", re.IGNORECASE),
         re.compile(r"eyJh[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}"), # JWT regex
         re.compile(r"sk-[a-zA-Z0-9]{20,}"), # Secret key regex
         re.compile(r"gsk_[a-zA-Z0-9]{20,}"), # Groq secret key regex
     ]
-    
+
     for c_dir in client_dirs:
         for root, _, files in os.walk(c_dir):
             for file in files:
@@ -219,7 +219,7 @@ def test_static_client_vault_terminology_removed():
         os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../apps/web/src")),
     ]
     vault_regex = re.compile(r"vault", re.IGNORECASE)
-    
+
     for c_dir in client_dirs:
         for root, _, files in os.walk(c_dir):
             for file in files:

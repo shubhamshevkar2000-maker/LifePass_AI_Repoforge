@@ -24,3 +24,86 @@ double_confirm_changes = true
 [storage]
 enabled = true
 file_size_limit = "50MiB"
+
+[functions.profile]
+enabled = true
+verify_jwt = false
+import_map = "./functions/profile/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/profile/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/profile/*.html" ]
+
+[functions.records]
+enabled = true
+verify_jwt = false
+import_map = "./functions/records/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/records/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/records/*.html" ]
+
+
+[functions.requirements]
+enabled = true
+verify_jwt = false
+import_map = "./functions/requirements/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/requirements/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/requirements/*.html" ]
+
+
+[functions.matching_evaluate]
+enabled = true
+verify_jwt = false
+import_map = "./functions/matching_evaluate/deno.json"
+entrypoint = "./functions/matching_evaluate/index.ts"
+
+[functions.institution_requests]
+enabled = true
+verify_jwt = false
+import_map = "./functions/institution_requests/deno.json"
+entrypoint = "./functions/institution_requests/index.ts"
+
+[functions.institution_request_send]
+enabled = true
+verify_jwt = false
+import_map = "./functions/institution_request_send/deno.json"
+entrypoint = "./functions/institution_request_send/index.ts"
+
+[functions.consent_decision]
+enabled = true
+verify_jwt = false
+import_map = "./functions/consent_decision/deno.json"
+entrypoint = "./functions/consent_decision/index.ts"
+
+[functions.consent_revoke]
+enabled = true
+verify_jwt = false
+import_map = "./functions/consent_revoke/deno.json"
+entrypoint = "./functions/consent_revoke/index.ts"
+
+[functions.ai_intent]
+enabled = true
+verify_jwt = false
+import_map = "./functions/ai_intent/deno.json"
+entrypoint = "./functions/ai_intent/index.ts"
+
+[functions.ai_requirements]
+enabled = true
+verify_jwt = false
+import_map = "./functions/ai_requirements/deno.json"
+entrypoint = "./functions/ai_requirements/index.ts"
+
+[functions.ai_explain]
+enabled = true
+verify_jwt = false
+import_map = "./functions/ai_explain/deno.json"
+entrypoint = "./functions/ai_explain/index.ts"
