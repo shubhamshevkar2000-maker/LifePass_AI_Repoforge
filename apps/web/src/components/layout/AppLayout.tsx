@@ -20,7 +20,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   const institutionName = activeMembership?.institution?.name || 'Verified Institution';
   const institutionType = activeMembership?.institution?.type?.toUpperCase() || 'INSTITUTION';
-  const userPhone = user?.phone || user?.email || undefined;
+  const userPhone = user?.user_metadata?.username || user?.user_metadata?.full_name || user?.phone || user?.email || undefined;
   const userRole = activeMembership?.role?.toUpperCase() || 'OFFICER';
 
   return (

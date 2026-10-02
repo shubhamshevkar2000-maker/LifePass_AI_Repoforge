@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useInstitutionAuth } from '../context/InstitutionAuthContext';
+import { Button } from './ui/Button';
+import { Badge } from './ui/Badge';
 
 export const AccessDeniedView: React.FC = () => {
   const { user, refreshMembership, signOut } = useInstitutionAuth();
@@ -11,25 +13,42 @@ export const AccessDeniedView: React.FC = () => {
     setIsChecking(false);
   };
 
+  const displayName =
+    user?.user_metadata?.username ||
+    user?.user_metadata?.full_name ||
+    user?.phone ||
+    user?.id ||
+    'Authenticated Officer';
+
+  const registeredOrg = user?.user_metadata?.institution_name;
+
   return (
     <div style={styles.card}>
-      <div style={styles.badgeDenied}>AUTHORIZATION BOUNDARY ENFORCED</div>
+      <Badge variant="danger" size="sm" style={{ marginBottom: '1rem' }}>
+        AUTHORIZATION BOUNDARY ENFORCED
+      </Badge>
       <h2 style={styles.title}>Institution Membership Required</h2>
       <p style={styles.subtitle}>
-        You have successfully authenticated via Supabase Auth, but your identity is not registered as an active member of any institution.
+        You have successfully authenticated via Supabase Auth, but your identity is not registered as an active member of any institution in PostgreSQL.
       </p>
 
       <div style={styles.infoBox}>
         <div style={styles.infoRow}>
-          <span style={styles.infoLabel}>Authenticated User</span>
-          <span style={styles.infoValue}>{user?.phone || user?.email || 'Authenticated User'}</span>
+          <span style={styles.infoLabel}>Authenticated Officer</span>
+          <span style={styles.infoValue}>{displayName}</span>
         </div>
+        {registeredOrg && (
+          <div style={styles.infoRow}>
+            <span style={styles.infoLabel}>Requested Organization</span>
+            <span style={styles.infoValue}>{registeredOrg}</span>
+          </div>
+        )}
         <div style={styles.infoRow}>
-          <span style={styles.infoLabel}>User ID</span>
+          <span style={styles.infoLabel}>User UUID</span>
           <span style={styles.infoValueMono}>{user?.id}</span>
         </div>
         <div style={styles.infoRow}>
-          <span style={styles.infoLabel}>Institution Status</span>
+          <span style={styles.infoLabel}>Membership Status</span>
           <span style={styles.infoStatus}>NO ACTIVE MEMBERSHIP</span>
         </div>
       </div>
@@ -39,18 +58,24 @@ export const AccessDeniedView: React.FC = () => {
       </div>
 
       <div style={styles.actions}>
-        <button
-          type="button"
-          style={{ ...styles.primaryBtn, opacity: isChecking ? 0.6 : 1 }}
+        <Button
+          variant="primary"
+          size="md"
+          fullWidth
+          isLoading={isChecking}
           onClick={handleRefresh}
-          disabled={isChecking}
         >
           {isChecking ? 'Checking Database...' : 'Re-check Membership'}
-        </button>
+        </Button>
 
-        <button type="button" style={styles.secondaryBtn} onClick={signOut}>
+        <Button
+          variant="secondary"
+          size="md"
+          fullWidth
+          onClick={signOut}
+        >
           Sign Out
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -66,18 +91,6 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     boxSizing: 'border-box',
     textAlign: 'center',
-  },
-  badgeDenied: {
-    display: 'inline-block',
-    backgroundColor: '#450A0A',
-    border: '1px solid #991B1B',
-    borderRadius: '0.375rem',
-    padding: '0.25rem 0.5rem',
-    fontSize: '0.6875rem',
-    fontWeight: 700,
-    color: '#F87171',
-    letterSpacing: '0.05em',
-    marginBottom: '1rem',
   },
   title: {
     fontSize: '1.375rem',
@@ -137,25 +150,5 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.75rem',
-  },
-  primaryBtn: {
-    backgroundColor: '#38BDF8',
-    color: '#090D16',
-    border: 'none',
-    borderRadius: '0.5rem',
-    padding: '0.75rem',
-    fontSize: '0.875rem',
-    fontWeight: 700,
-    cursor: 'pointer',
-  },
-  secondaryBtn: {
-    backgroundColor: 'transparent',
-    color: '#9CA3AF',
-    border: '1px solid #374151',
-    borderRadius: '0.5rem',
-    padding: '0.625rem',
-    fontSize: '0.8125rem',
-    fontWeight: 600,
-    cursor: 'pointer',
   },
 };

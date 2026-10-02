@@ -7,6 +7,15 @@ export interface InstitutionMembershipWithDetails extends InstitutionMember {
   institution?: Institution;
 }
 
+export interface InstitutionSignUpData {
+  fullName: string;
+  institutionName: string;
+  institutionType: string;
+  phone: string;
+  username: string;
+  password: string;
+}
+
 export interface InstitutionAuthContextType {
   user: User | null;
   session: Session | null;
@@ -16,8 +25,8 @@ export interface InstitutionAuthContextType {
   isConfigured: boolean;
   error: string | null;
   isMemberVerified: boolean;
-  sendOtp: (phone: string) => Promise<{ success: boolean; error?: string }>;
-  verifyOtp: (phone: string, token: string) => Promise<{ success: boolean; error?: string }>;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (data: InstitutionSignUpData) => Promise<{ success: boolean; error?: string }>;
   refreshMembership: () => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
@@ -126,7 +135,7 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
     };
   }, []);
 
-  const sendOtp = async (phone: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setError(null);
     if (!isSupabaseConfigured) {
       const msg = 'Supabase environment not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
@@ -135,37 +144,23 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
     }
 
     try {
-      const formattedPhone = phone.trim().startsWith('+') ? phone.trim() : `+${phone.trim()}`;
-      const { error: otpErr } = await supabase.auth.signInWithOtp({
-        phone: formattedPhone,
-        options: { channel: 'sms' },
+      const cleanUsername = username.trim().toLowerCase();
+      // Supabase GoTrue internally maps identity to email or phone.
+      // We map username to an internal pseudo-domain to provide a zero-email, zero-OTP user experience.
+      const internalEmail = `${cleanUsername}@institution.lifepass.internal`;
+
+      const { data, error: authErr } = await supabase.auth.signInWithPassword({
+        email: internalEmail,
+        password,
       });
 
-      if (otpErr) {
-        setError(otpErr.message);
-        return { success: false, error: otpErr.message };
-      }
-      return { success: true };
-    } catch (err: any) {
-      const msg = err?.message || 'Failed to request OTP';
-      setError(msg);
-      return { success: false, error: msg };
-    }
-  };
-
-  const verifyOtp = async (phone: string, token: string): Promise<{ success: boolean; error?: string }> => {
-    setError(null);
-    try {
-      const formattedPhone = phone.trim().startsWith('+') ? phone.trim() : `+${phone.trim()}`;
-      const { data, error: verifyErr } = await supabase.auth.verifyOtp({
-        phone: formattedPhone,
-        token: token.trim(),
-        type: 'sms',
-      });
-
-      if (verifyErr) {
-        setError(verifyErr.message);
-        return { success: false, error: verifyErr.message };
+      if (authErr) {
+        const errorMsg =
+          authErr.message === 'Invalid login credentials'
+            ? 'Invalid username or password.'
+            : authErr.message;
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
       }
 
       if (data.session && data.user) {
@@ -176,7 +171,59 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
       }
       return { success: false, error: 'Authentication could not be established.' };
     } catch (err: any) {
-      const msg = err?.message || 'Invalid verification code';
+      const msg = err?.message || 'Login failed';
+      setError(msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  const signUp = async (data: InstitutionSignUpData): Promise<{ success: boolean; error?: string }> => {
+    setError(null);
+    if (!isSupabaseConfigured) {
+      const msg = 'Supabase environment not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
+      setError(msg);
+      return { success: false, error: msg };
+    }
+
+    try {
+      const cleanUsername = data.username.trim().toLowerCase();
+      const internalEmail = `${cleanUsername}@institution.lifepass.internal`;
+      const formattedPhone = data.phone.trim().startsWith('+') ? data.phone.trim() : `+${data.phone.trim()}`;
+
+      const { data: authData, error: authErr } = await supabase.auth.signUp({
+        email: internalEmail,
+        password: data.password,
+        options: {
+          data: {
+            username: cleanUsername,
+            full_name: data.fullName.trim(),
+            institution_name: data.institutionName.trim(),
+            institution_type: data.institutionType.trim().toLowerCase(),
+            phone: formattedPhone,
+          },
+        },
+      });
+
+      if (authErr) {
+        setError(authErr.message);
+        return { success: false, error: authErr.message };
+      }
+
+      if (authData.session && authData.user) {
+        setSession(authData.session);
+        setUser(authData.user);
+        await fetchInstitutionMemberships(authData.user.id);
+        return { success: true };
+      } else if (authData.user && !authData.session) {
+        return {
+          success: true,
+          error: 'Registration submitted! Please sign in with your credentials.',
+        };
+      }
+
+      return { success: false, error: 'Registration failed to initialize session.' };
+    } catch (err: any) {
+      const msg = err?.message || 'Registration failed';
       setError(msg);
       return { success: false, error: msg };
     }
@@ -214,8 +261,8 @@ export const InstitutionAuthProvider: React.FC<{ children: React.ReactNode }> = 
         isConfigured: isSupabaseConfigured,
         error,
         isMemberVerified,
-        sendOtp,
-        verifyOtp,
+        login,
+        signUp,
         refreshMembership,
         signOut,
         clearError,
