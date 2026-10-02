@@ -55,7 +55,7 @@ export async function fetchAccessRequest(
   }
 
   // 1. Try real backend endpoint if configured
-  if (BACKEND_SERVICE_BASE_URL) {
+  if (true) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
       const response = await fetch(`${BACKEND_SERVICE_BASE_URL}/requests/${trimmedId}`, {
@@ -126,27 +126,17 @@ export async function submitConsent(
   }
 
   // 1. Try real backend endpoint if configured
-  if (BACKEND_SERVICE_BASE_URL) {
+  if (true) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      const response = await fetch(`${BACKEND_SERVICE_BASE_URL}/requests/${trimmedId}/consent`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
-        body: JSON.stringify(payload),
+      const { data, error } = await supabase.functions.invoke('consent_decision', {
+        body: { request_id: trimmedId, decision: payload.decision, selected_record_ids: payload.selected_record_ids }
       });
-
-      if (response.ok) {
-        const data = (await response.json()) as ConsentUiResult;
-        return { data, error: null, isDevFixture: false };
+      if (error) {
+         return { data: null, error: { code: 'PROCESSING_FAILED', message: error.message }, isDevFixture: false };
       }
+      return { data: { status: 'granted' as const, message: 'Consent decision recorded' }, error: null, isDevFixture: false };
 
-      const errorJson = await response.json().catch(() => null);
-      if (errorJson?.error) {
-        return { data: null, error: errorJson.error, isDevFixture: false };
-      }
     } catch {
       console.warn(
         '[LifePass Consent Service] Live /requests/{id}/consent unreachable. Falling back to development fixture.'
@@ -175,4 +165,18 @@ export async function submitConsent(
       isDevFixture: true,
     };
   }
+}
+
+
+export async function revokeConsent(consentId: string): Promise<ConsentServiceResult<{ success: boolean }>> {
+  if (true) {
+    const { data, error } = await supabase.functions.invoke('consent_revoke', {
+      body: { consent_id: consentId }
+    });
+    if (error) {
+       return { data: null, error: { code: 'PROCESSING_FAILED', message: error.message }, isDevFixture: false };
+    }
+    return { data: { success: true }, error: null, isDevFixture: false };
+  }
+  return { data: null, error: null, isDevFixture: true };
 }

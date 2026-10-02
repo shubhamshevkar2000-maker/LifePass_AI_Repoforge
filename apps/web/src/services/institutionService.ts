@@ -229,7 +229,7 @@ export async function createAndSendInstitutionRequest(input: {
           ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
         body: JSON.stringify({
-          phone: input.citizenPhone,
+          citizen_phone: input.citizenPhone,
           purpose: input.purpose,
           requirement_profile_id: input.requirementProfileId,
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -248,6 +248,11 @@ export async function createAndSendInstitutionRequest(input: {
         }).catch(() => null);
 
         return { data: created, error: null, isDevFixture: false };
+      }
+
+      const errorJson = await response.json().catch(() => null);
+      if (errorJson?.error) {
+        return { data: null, error: errorJson.error, isDevFixture: false };
       }
     } catch {
       // Fallback

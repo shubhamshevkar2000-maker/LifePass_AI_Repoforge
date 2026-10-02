@@ -50,7 +50,7 @@ export async function evaluateRecordMatching(
   }
 
   // 1. Attempt real backend endpoint if configured
-  if (BACKEND_SERVICE_BASE_URL) {
+  if (true) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
       const userId = session?.user?.id;
@@ -71,24 +71,42 @@ export async function evaluateRecordMatching(
         requirement_profile_id: trimmedProfileId,
       };
 
-      const response = await fetch(`${BACKEND_SERVICE_BASE_URL}/matching/evaluate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
-        body: JSON.stringify(payload),
+      // Call Supabase Edge Function 'matching_evaluate'
+      const { data: edgeData, error: edgeError } = await supabase.functions.invoke('matching_evaluate', {
+        body: payload
       });
 
-      if (response.ok) {
-        const data = (await response.json()) as MatchingEvaluateResponse;
-        return { data, error: null, isDevFixture: false };
+      if (edgeError) {
+        return { data: null, error: { code: 'PROCESSING_FAILED', message: edgeError.message }, isDevFixture: false };
       }
 
-      const errorJson = await response.json().catch(() => null);
-      if (errorJson?.error) {
-        return { data: null, error: errorJson.error, isDevFixture: false };
-      }
+      // Adapter for nested backend structure to flat UI structure
+      const adaptMatched = (item: any) => ({
+        requirement_id: item.requirement?.id,
+        requirement_name: item.requirement?.name,
+        requirement_code: item.requirement?.code,
+        record_id: item.record?.id,
+        record_title: item.record?.title,
+        processing_status: item.record?.status,
+        external_verification_status: item.record?.external_verification_status
+      });
+
+      const adaptMissing = (item: any) => ({
+        requirement_id: item.requirement?.id,
+        requirement_name: item.requirement?.name,
+        requirement_code: item.requirement?.code,
+        category: item.requirement?.category,
+        reason: item.reason
+      });
+
+      const adaptedData: MatchingEvaluateResponse = {
+        readiness_percent: edgeData.readiness_percent,
+        matched: (edgeData.matched || []).map(adaptMatched),
+        missing: (edgeData.missing || []).map(adaptMissing),
+        attention_needed: edgeData.attention_needed || []
+      };
+
+      return { data: adaptedData, error: null, isDevFixture: false };
     } catch {
       console.warn(
         '[LifePass Matching Service] Live /matching/evaluate unreachable. Falling back to development fixture.'

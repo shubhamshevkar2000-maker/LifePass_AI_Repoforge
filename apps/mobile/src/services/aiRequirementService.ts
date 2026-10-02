@@ -54,28 +54,16 @@ export async function interpretTaskIntent(
   }
 
   // 1. Try real backend endpoint if configured
-  if (AI_SERVICE_BASE_URL) {
+  if (true) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      const response = await fetch(`${AI_SERVICE_BASE_URL}/ai/intent`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
-        body: JSON.stringify({ message: trimmed } as AiIntentRequest),
+      const { data, error } = await supabase.functions.invoke('ai_intent', {
+        body: { message: trimmed }
       });
-
-      if (response.ok) {
-        const data = (await response.json()) as AiIntentResponse;
-        return { data, error: null, isDevFixture: false };
+      if (error) {
+         return { data: null, error: { code: 'PROCESSING_FAILED', message: error.message }, isDevFixture: false };
       }
-
-      // Handle structured API error
-      const errorJson = await response.json().catch(() => null);
-      if (errorJson?.error) {
-        return { data: null, error: errorJson.error, isDevFixture: false };
-      }
+      return { data, error: null, isDevFixture: false };
     } catch {
       // Backend request failed; fall through to development fixture
       console.warn(
@@ -128,27 +116,41 @@ export async function fetchRequirementProfile(
   }
 
   // 1. Try real backend endpoint if configured
-  if (AI_SERVICE_BASE_URL) {
+  if (true) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      const response = await fetch(`${AI_SERVICE_BASE_URL}/ai/requirements`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
-        body: JSON.stringify({ task: trimmed } as AiRequirementsRequest),
-      });
+      const { data: profile, error: profileErr } = await supabase
+        .from('requirement_profiles')
+        .select('id, name, domain, task_code, version, description, status')
+        .eq('task_code', trimmed)
+        .eq('status', 'active')
+        .single();
 
-      if (response.ok) {
-        const data = (await response.json()) as RequirementProfile;
-        return { data, error: null, isDevFixture: false };
+      if (profileErr || !profile) {
+        return { data: null, error: { code: 'REQUIREMENT_PROFILE_NOT_FOUND', message: 'Profile not found.' }, isDevFixture: false };
       }
 
-      const errorJson = await response.json().catch(() => null);
-      if (errorJson?.error) {
-        return { data: null, error: errorJson.error, isDevFixture: false };
+      const { data: reqs, error: reqsErr } = await supabase
+        .from('requirements')
+        .select('*')
+        .eq('profile_id', profile.id);
+
+      if (reqsErr) {
+        return { data: null, error: { code: 'PROCESSING_FAILED', message: reqsErr.message }, isDevFixture: false };
       }
+
+      const requirementProfile: RequirementProfile = {
+        profile_id: profile.id,
+        name: profile.name,
+        domain: profile.domain,
+        task_code: profile.task_code,
+        version: profile.version,
+        description: profile.description,
+        status: profile.status,
+        requirements: reqs
+      };
+
+      return { data: requirementProfile, error: null, isDevFixture: false };
     } catch {
       console.warn(
         '[LifePass AI Service] Live /ai/requirements unreachable. Falling back to development fixture.'

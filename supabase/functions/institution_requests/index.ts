@@ -44,11 +44,57 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: { code: 'INVALID_INPUT', message: 'Malformed JSON payload' } }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { institution_id, user_id, requirement_profile_id, purpose, expires_at } = body;
+    let { institution_id, citizen_phone, requirement_profile_id, purpose, expires_at } = body;
 
-    if (!institution_id || !user_id || !requirement_profile_id || !purpose || !expires_at) {
+    // Fallback if frontend sends 'phone' instead of 'citizen_phone'
+    if (!citizen_phone && body.phone) {
+      citizen_phone = body.phone;
+    }
+
+    if (!citizen_phone || !requirement_profile_id || !purpose || !expires_at) {
       return new Response(JSON.stringify({ error: { code: 'INVALID_INPUT', message: 'Missing required fields' } }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+
+    if (!institution_id) {
+       // Attempt to derive institution_id from the authenticated user's membership
+       const { data: members, error: memError } = await supabaseClient
+         .from('institution_members')
+         .select('institution_id')
+         .eq('user_id', user.id)
+         .eq('status', 'active');
+
+       if (memError || !members || members.length === 0) {
+          return new Response(JSON.stringify({ error: { code: 'FORBIDDEN', message: 'Not an active institution member' } }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+       }
+       institution_id = members[0].institution_id;
+    }
+
+    // Initialize service role client for privileged lookup
+    const serviceClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Private lookup of user_id by citizen_phone
+    const { data: profiles, error: profileError } = await serviceClient
+      .from('profiles')
+      .select('id')
+      .eq('phone', citizen_phone);
+
+    if (profileError) {
+      console.error("Profile lookup error:", profileError);
+      return new Response(JSON.stringify({ error: { code: 'PROCESSING_FAILED', message: 'Internal server error during identity resolution' } }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    if (!profiles || profiles.length === 0) {
+      return new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: 'No citizen found with the provided phone number' } }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    if (profiles.length > 1) {
+      return new Response(JSON.stringify({ error: { code: 'AMBIGUOUS_IDENTITY', message: 'Multiple records match this phone number. Cannot safely resolve citizen identity.' } }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const user_id = profiles[0].id;
 
     // Call the RPC transaction
     const { data, error } = await supabaseClient.rpc('create_institution_access_request', {

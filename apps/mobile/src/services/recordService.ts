@@ -142,19 +142,12 @@ export const listRecords = async (category?: RecordCategory): Promise<ServiceRes
   }
 
   try {
-    let query = supabase
-      .from('records')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data: respData, error: respError } = await supabase.functions.invoke('records', {
+      method: 'GET'
+    });
 
-    if (category) {
-      query = query.eq('category', category);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      if (isTableMissingError(error)) {
+    if (respError) {
+      if (isTableMissingError(respError)) {
         // Backend migration not yet applied by Workstream 1
         const filtered = category
           ? DEV_FIXTURE_RECORDS.filter((r) => r.category === category)
@@ -166,10 +159,13 @@ export const listRecords = async (category?: RecordCategory): Promise<ServiceRes
           isBackendAvailable: false,
         };
       }
-      return { data: null, error: error.message, isBackendAvailable: true };
+      return { data: null, error: respError.message, isBackendAvailable: true };
     }
 
-    return { data: (data as RecordItem[]) || [], error: null, isBackendAvailable: true };
+    let finalData = respData;
+    if (category) { finalData = finalData.filter((r: any) => r.category === category); }
+
+    return { data: (finalData as RecordItem[]) || [], error: null, isBackendAvailable: true };
   } catch (err: any) {
     return {
       data: null,
@@ -303,11 +299,10 @@ export const createRecordMetadata = async (
       metadata: input.metadata || {},
     };
 
-    const { data, error } = await supabase
-      .from('records')
-      .insert(payload)
-      .select()
-      .single();
+    const { data, error } = await supabase.functions.invoke('records', {
+      method: 'POST',
+      body: payload
+    });
 
     if (error) {
       if (isTableMissingError(error)) {
@@ -397,5 +392,20 @@ export const deleteRecord = async (
     return { success: true, error: null };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Failed to delete record.' };
+  }
+};
+
+export const processRecord = async (recordId: string): Promise<ServiceResult<RecordItem>> => {
+  if (!isSupabaseConfigured) {
+    return { data: null, error: 'Database not configured.', isBackendAvailable: false };
+  }
+  try {
+    const { data, error } = await supabase.functions.invoke(`records/${recordId}/process`, {
+      method: 'POST'
+    });
+    if (error) return { data: null, error: error.message, isBackendAvailable: true };
+    return { data: data as RecordItem, error: null, isBackendAvailable: true };
+  } catch (err: any) {
+    return { data: null, error: err?.message, isBackendAvailable: false };
   }
 };
