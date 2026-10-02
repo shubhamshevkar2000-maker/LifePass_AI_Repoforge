@@ -33,6 +33,7 @@ export const AskLifePassView: React.FC<AskLifePassViewProps> = ({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [prefilledUploadCategory, setPrefilledUploadCategory] = useState<RecordCategory>('Education');
   const [prefilledUploadType, setPrefilledUploadType] = useState<string>('');
+  const [prefilledUploadName, setPrefilledUploadName] = useState<string>('');
 
   // Re-run analysis whenever submittedTask or records change
   const analysisResult: TaskAnalysisResult | null = useMemo(() => {
@@ -66,6 +67,7 @@ export const AskLifePassView: React.FC<AskLifePassViewProps> = ({
   const handleAddMissing = (missing: MissingRequirement) => {
     setPrefilledUploadCategory(missing.requirement.category);
     setPrefilledUploadType(missing.requirement.documentType);
+    setPrefilledUploadName(missing.requirement.label);
     setIsUploadModalOpen(true);
   };
 
@@ -198,7 +200,7 @@ export const AskLifePassView: React.FC<AskLifePassViewProps> = ({
         onClose={() => setIsUploadModalOpen(false)}
         initialCategory={prefilledUploadCategory}
         initialRecordType={prefilledUploadType}
-        initialName={prefilledUploadType ? `${prefilledUploadType}` : ''}
+        initialName={prefilledUploadName}
         onAddRecord={(newRecord) => {
           onAddRecord(newRecord);
           setIsUploadModalOpen(false);

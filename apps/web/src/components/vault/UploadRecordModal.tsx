@@ -169,7 +169,7 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
           name: name.trim(),
           category,
           type: recordType.trim(),
-          status: 'PENDING',
+          status: 'VERIFIED',
           source: 'User Uploaded',
           addedAt: todayStr,
           updatedAt: todayStr,
@@ -344,8 +344,8 @@ export const UploadRecordModal: React.FC<UploadRecordModalProps> = ({
         {/* Disclaimer / In-Memory Session Notice */}
         <div style={styles.disclaimerNotice}>
           📁 <strong>Frontend Demo Vault:</strong> Records added during this session are stored in local memory
-          for demonstration. Initial status is set to{' '}
-          <span style={{ fontWeight: 600, color: theme.colors.warningText }}>PENDING</span> for verification preview.
+          for demonstration. Status is marked as{' '}
+          <span style={{ fontWeight: 600, color: theme.colors.successText }}>VERIFIED</span> for task readiness preview.
         </div>
       </form>
     </Modal>
