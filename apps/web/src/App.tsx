@@ -49,7 +49,7 @@ export default function App() {
 const styles: Record<string, React.CSSProperties> = {
   centerContainer: {
     minHeight: '100vh',
-    backgroundColor: '#090D16',
+    backgroundColor: '#F8FAFC',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -60,14 +60,15 @@ const styles: Record<string, React.CSSProperties> = {
   spinner: {
     width: '2.5rem',
     height: '2.5rem',
-    border: '3px solid #1F2937',
-    borderTopColor: '#38BDF8',
+    border: '3px solid #E2E8F0',
+    borderTopColor: '#0284C7',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
   },
   loadingText: {
     marginTop: '1rem',
-    color: '#9CA3AF',
+    color: '#64748B',
     fontSize: '0.875rem',
+    fontWeight: 500,
   },
 };
