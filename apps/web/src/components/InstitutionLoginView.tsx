@@ -4,6 +4,7 @@ import { Card } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
+import { theme } from '../styles/theme';
 
 export const InstitutionLoginView: React.FC = () => {
   const { login, signUp, error, clearError, setSelectedPortal } = useInstitutionAuth();
@@ -124,6 +125,9 @@ export const InstitutionLoginView: React.FC = () => {
         maxWidth: mode === 'signup' ? '540px' : '440px',
         width: '100%',
         margin: '0 auto',
+        backgroundColor: theme.colors.surface,
+        border: `1px solid ${theme.colors.border}`,
+        boxShadow: theme.shadows.md,
         boxSizing: 'border-box',
       }}
       padding="lg"
@@ -135,11 +139,12 @@ export const InstitutionLoginView: React.FC = () => {
         style={{
           background: 'none',
           border: 'none',
-          color: '#38BDF8',
+          color: theme.colors.primary,
           fontSize: '0.8125rem',
+          fontWeight: 600,
           cursor: 'pointer',
           padding: 0,
-          marginBottom: '1rem',
+          marginBottom: '1.25rem',
           textAlign: 'left',
           display: 'inline-block',
         }}
@@ -149,21 +154,23 @@ export const InstitutionLoginView: React.FC = () => {
 
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <Badge variant="info" size="sm" style={{ marginBottom: '0.75rem' }}>
-          INSTITUTION PORTAL
-        </Badge>
+        <div style={{ marginBottom: '0.75rem' }}>
+          <Badge variant="info" size="sm">
+            INSTITUTION PORTAL
+          </Badge>
+        </div>
         <h1
           style={{
             fontSize: '1.5rem',
             fontWeight: 800,
-            color: '#F9FAFB',
+            color: theme.colors.textPrimary,
             margin: '0 0 0.25rem 0',
             letterSpacing: '-0.02em',
           }}
         >
           LifePass Institution Portal
         </h1>
-        <p style={{ fontSize: '0.8125rem', color: '#9CA3AF', margin: 0 }}>
+        <p style={{ fontSize: '0.8125rem', color: theme.colors.textSecondary, margin: 0 }}>
           Unified Life-Stage Digital Identity & Verification Network
         </p>
       </div>
@@ -172,11 +179,11 @@ export const InstitutionLoginView: React.FC = () => {
       <div
         style={{
           display: 'flex',
-          backgroundColor: '#090D16',
+          backgroundColor: theme.colors.neutralBg,
           borderRadius: '0.5rem',
           padding: '0.25rem',
           marginBottom: '1.25rem',
-          border: '1px solid #1F2937',
+          border: `1px solid ${theme.colors.border}`,
         }}
       >
         <button
@@ -190,8 +197,9 @@ export const InstitutionLoginView: React.FC = () => {
             fontSize: '0.8125rem',
             fontWeight: 700,
             cursor: 'pointer',
-            backgroundColor: mode === 'login' ? '#1E293B' : 'transparent',
-            color: mode === 'login' ? '#38BDF8' : '#9CA3AF',
+            backgroundColor: mode === 'login' ? theme.colors.surface : 'transparent',
+            color: mode === 'login' ? theme.colors.primary : theme.colors.textSecondary,
+            boxShadow: mode === 'login' ? theme.shadows.xs : 'none',
             transition: 'all 0.15s ease',
           }}
         >
@@ -208,8 +216,9 @@ export const InstitutionLoginView: React.FC = () => {
             fontSize: '0.8125rem',
             fontWeight: 700,
             cursor: 'pointer',
-            backgroundColor: mode === 'signup' ? '#1E293B' : 'transparent',
-            color: mode === 'signup' ? '#38BDF8' : '#9CA3AF',
+            backgroundColor: mode === 'signup' ? theme.colors.surface : 'transparent',
+            color: mode === 'signup' ? theme.colors.primary : theme.colors.textSecondary,
+            boxShadow: mode === 'signup' ? theme.shadows.xs : 'none',
             transition: 'all 0.15s ease',
           }}
         >
@@ -221,14 +230,15 @@ export const InstitutionLoginView: React.FC = () => {
       {successNotice && (
         <div
           style={{
-            backgroundColor: '#064E3B',
-            border: '1px solid #059669',
+            backgroundColor: theme.colors.successBg,
+            border: `1px solid ${theme.colors.successBorder}`,
             borderRadius: '0.5rem',
             padding: '0.75rem',
             fontSize: '0.75rem',
-            color: '#34D399',
+            color: theme.colors.successText,
             marginBottom: '1rem',
             lineHeight: 1.4,
+            fontWeight: 500,
           }}
         >
           {successNotice}
@@ -239,23 +249,22 @@ export const InstitutionLoginView: React.FC = () => {
       {error && (
         <div
           style={{
-            backgroundColor: '#450A0A',
-            border: '1px solid #991B1B',
+            backgroundColor: theme.colors.dangerBg,
+            border: `1px solid ${theme.colors.dangerBorder}`,
             borderRadius: '0.5rem',
             padding: '0.75rem',
             fontSize: '0.75rem',
-            color: '#F87171',
+            color: theme.colors.dangerText,
             marginBottom: '1rem',
             lineHeight: 1.4,
+            fontWeight: 500,
           }}
         >
           {error}
         </div>
       )}
 
-      {/* ================================================================ */}
-      {/* 1. LOGIN FORM                                                   */}
-      {/* ================================================================ */}
+      {/* 1. LOGIN FORM */}
       {mode === 'login' && (
         <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Input
@@ -304,7 +313,7 @@ export const InstitutionLoginView: React.FC = () => {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#38BDF8',
+                color: theme.colors.primary,
                 fontSize: '0.8125rem',
                 cursor: 'pointer',
                 fontWeight: 600,
@@ -316,9 +325,7 @@ export const InstitutionLoginView: React.FC = () => {
         </form>
       )}
 
-      {/* ================================================================ */}
-      {/* 2. SIGN UP FORM                                                 */}
-      {/* ================================================================ */}
+      {/* 2. SIGN UP FORM */}
       {mode === 'signup' && (
         <form onSubmit={handleSignupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
           <Input
@@ -349,23 +356,24 @@ export const InstitutionLoginView: React.FC = () => {
             />
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-              <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#E5E7EB' }}>
-                Institution Type <span style={{ color: '#EF4444' }}>*</span>
+              <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: theme.colors.textPrimary }}>
+                Institution Type <span style={{ color: theme.colors.danger }}>*</span>
               </label>
               <select
                 value={institutionType}
                 onChange={(e) => setInstitutionType(e.target.value)}
                 disabled={isSubmitting}
                 style={{
-                  backgroundColor: '#090D16',
-                  border: '1px solid #374151',
+                  backgroundColor: theme.colors.surface,
+                  border: `1px solid ${theme.colors.borderDark}`,
                   borderRadius: '0.5rem',
                   padding: '0.625rem 0.875rem',
-                  color: '#F9FAFB',
+                  color: theme.colors.textPrimary,
                   fontSize: '0.875rem',
                   outline: 'none',
                   boxSizing: 'border-box',
                   width: '100%',
+                  boxShadow: theme.shadows.xs,
                 }}
               >
                 <option value="bank">Bank / Financial Institution</option>
@@ -455,7 +463,7 @@ export const InstitutionLoginView: React.FC = () => {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#38BDF8',
+                color: theme.colors.primary,
                 fontSize: '0.8125rem',
                 cursor: 'pointer',
                 fontWeight: 600,
@@ -471,11 +479,11 @@ export const InstitutionLoginView: React.FC = () => {
       <div
         style={{
           marginTop: '1.5rem',
-          borderTop: '1px solid #1F2937',
+          borderTop: `1px solid ${theme.colors.borderLight}`,
           paddingTop: '1rem',
           textAlign: 'center',
           fontSize: '0.75rem',
-          color: '#9CA3AF',
+          color: theme.colors.textMuted,
           lineHeight: 1.4,
         }}
       >

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useInstitutionAuth } from '../context/InstitutionAuthContext';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
+import { theme } from '../styles/theme';
 
 export const AccessDeniedView: React.FC = () => {
   const { user, refreshMembership, signOut } = useInstitutionAuth();
@@ -24,9 +25,11 @@ export const AccessDeniedView: React.FC = () => {
 
   return (
     <div style={styles.card}>
-      <Badge variant="danger" size="sm" style={{ marginBottom: '1rem' }}>
-        AUTHORIZATION BOUNDARY ENFORCED
-      </Badge>
+      <div style={{ marginBottom: '1rem' }}>
+        <Badge variant="danger" size="sm">
+          AUTHORIZATION BOUNDARY ENFORCED
+        </Badge>
+      </div>
       <h2 style={styles.title}>Institution Membership Required</h2>
       <p style={styles.subtitle}>
         You have successfully authenticated, but your identity is not registered as an active member of any institution.
@@ -83,30 +86,31 @@ export const AccessDeniedView: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   card: {
-    backgroundColor: '#111827',
-    border: '1px solid #1F2937',
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.border}`,
     borderRadius: '1rem',
     padding: '2rem',
     maxWidth: '500px',
     width: '100%',
+    boxShadow: theme.shadows.md,
     boxSizing: 'border-box',
     textAlign: 'center',
   },
   title: {
     fontSize: '1.375rem',
     fontWeight: 700,
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
     margin: '0 0 0.5rem 0',
   },
   subtitle: {
     fontSize: '0.875rem',
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     lineHeight: '1.4',
     margin: '0 0 1.5rem 0',
   },
   infoBox: {
-    backgroundColor: '#090D16',
-    border: '1px solid #1F2937',
+    backgroundColor: theme.colors.surfaceSubtle,
+    border: `1px solid ${theme.colors.border}`,
     borderRadius: '0.5rem',
     padding: '1rem',
     marginBottom: '1.25rem',
@@ -116,32 +120,32 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     padding: '0.375rem 0',
-    borderBottom: '1px solid #1F2937',
+    borderBottom: `1px solid ${theme.colors.borderLight}`,
     fontSize: '0.75rem',
   },
   infoLabel: {
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
   },
   infoValue: {
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
     fontWeight: 600,
   },
   infoValueMono: {
-    color: '#38BDF8',
-    fontFamily: 'monospace',
+    color: theme.colors.primary,
+    fontFamily: theme.typography.fontMono,
     fontSize: '0.6875rem',
   },
   infoStatus: {
-    color: '#EF4444',
+    color: theme.colors.dangerText,
     fontWeight: 700,
   },
   policyNotice: {
-    backgroundColor: '#1E293B',
-    border: '1px solid #334155',
+    backgroundColor: theme.colors.warningBg,
+    border: `1px solid ${theme.colors.warningBorder}`,
     borderRadius: '0.5rem',
     padding: '0.75rem',
     fontSize: '0.75rem',
-    color: '#CBD5E1',
+    color: theme.colors.warningText,
     textAlign: 'left',
     lineHeight: '1.4',
     marginBottom: '1.5rem',

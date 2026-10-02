@@ -104,16 +104,17 @@ export class MockAuthAdapter implements IAuthAdapter {
     if (storedSession) {
       user = storedSession;
     } else if (targetType === 'INDIVIDUAL') {
+      const formattedName = cleanUsername
+        ? cleanUsername.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+        : 'Shubham';
       user = {
         userId: `user-${cleanUsername.toLowerCase().replace(/[^a-z0-9]/g, '') || 'demo'}`,
-        username: cleanUsername,
-        fullName: cleanUsername
-          .replace(/_/g, ' ')
-          .replace(/\b\w/g, (char) => char.toUpperCase()),
+        username: cleanUsername || 'shubham',
+        fullName: formattedName,
         userType: 'INDIVIDUAL',
         role: 'CITIZEN',
-        phone: '+1 555-0182',
-        identityType: 'National ID / Passport',
+        phone: '+91 98765 43210',
+        identityType: 'National ID / Aadhaar',
       };
     } else {
       user = {
@@ -181,8 +182,7 @@ export class MockAuthAdapter implements IAuthAdapter {
       fullName: data.fullName.trim(),
       userType: 'INDIVIDUAL',
       role: 'CITIZEN',
-      phone: data.phone?.trim() || '+1 555-0100',
-      email: data.email?.trim() || `${cleanUsername.toLowerCase()}@example.com`,
+      phone: data.phone?.trim() || '+91 98765 43210',
       identityType: data.identityType?.trim() || 'Government Issued ID',
     };
 

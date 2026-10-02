@@ -4,6 +4,7 @@ import { Card } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
+import { theme } from '../styles/theme';
 
 export const IndividualAuthView: React.FC = () => {
   const { login, signUpIndividual, error, clearError, setSelectedPortal } = useInstitutionAuth();
@@ -49,7 +50,7 @@ export const IndividualAuthView: React.FC = () => {
       errs.signupUsername = 'Username may only contain letters, numbers, underscores, and dashes.';
     }
     if (!contact.trim()) {
-      errs.contact = 'Contact phone number or email is required.';
+      errs.contact = 'Contact phone number is required.';
     }
     if (!signupPassword) {
       errs.signupPassword = 'Password is required.';
@@ -113,9 +114,11 @@ export const IndividualAuthView: React.FC = () => {
 
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <Badge variant="success" size="sm" style={{ marginBottom: '0.75rem' }}>
-          INDIVIDUAL VAULT
-        </Badge>
+        <div style={{ marginBottom: '0.75rem' }}>
+          <Badge variant="info" size="sm">
+            INDIVIDUAL VAULT
+          </Badge>
+        </div>
         <h1 style={styles.title}>
           {mode === 'login' ? 'Sign In to Your Vault' : 'Create Individual Account'}
         </h1>
@@ -171,7 +174,7 @@ export const IndividualAuthView: React.FC = () => {
         <form onSubmit={handleLoginSubmit} style={styles.form}>
           <Input
             label="Portal Username"
-            placeholder="e.g. rahul_sharma or john_citizen"
+            placeholder="e.g. shubham or john_citizen"
             value={loginUsername}
             onChange={(e) => setLoginUsername(e.target.value)}
             error={formErrors.username}
@@ -220,7 +223,7 @@ export const IndividualAuthView: React.FC = () => {
         <form onSubmit={handleSignupSubmit} style={styles.form}>
           <Input
             label="Full Name"
-            placeholder="e.g. Rahul Sharma"
+            placeholder="e.g. Shubham Sharma"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             error={formErrors.fullName}
@@ -229,7 +232,7 @@ export const IndividualAuthView: React.FC = () => {
 
           <Input
             label="Choose Username"
-            placeholder="e.g. rahul_sharma"
+            placeholder="e.g. shubham"
             value={signupUsername}
             onChange={(e) => setSignupUsername(e.target.value)}
             error={formErrors.signupUsername}
@@ -238,8 +241,8 @@ export const IndividualAuthView: React.FC = () => {
           />
 
           <Input
-            label="Contact Phone / Email"
-            placeholder="e.g. +91 98765 43210 or user@example.com"
+            label="Contact Phone Number"
+            placeholder="e.g. +91 98765 43210"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             error={formErrors.contact}
@@ -249,7 +252,7 @@ export const IndividualAuthView: React.FC = () => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
             <label style={styles.selectLabel}>
-              Primary Identity Document <span style={{ color: '#EF4444' }}>*</span>
+              Primary Identity Document <span style={{ color: theme.colors.danger }}>*</span>
             </label>
             <select
               value={identityType}
@@ -325,36 +328,38 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     padding: '2rem',
     borderRadius: '1rem',
-    backgroundColor: '#111827',
-    border: '1px solid #1F2937',
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.border}`,
+    boxShadow: theme.shadows.md,
     boxSizing: 'border-box',
   },
   backButton: {
     background: 'none',
     border: 'none',
-    color: '#38BDF8',
+    color: theme.colors.primary,
     fontSize: '0.8125rem',
+    fontWeight: 600,
     cursor: 'pointer',
     padding: 0,
-    marginBottom: '1rem',
+    marginBottom: '1.25rem',
     textAlign: 'left',
     display: 'inline-block',
   },
   title: {
     fontSize: '1.5rem',
     fontWeight: 700,
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
     margin: '0 0 0.5rem 0',
   },
   subtitle: {
     fontSize: '0.875rem',
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     margin: 0,
     lineHeight: 1.4,
   },
   tabContainer: {
     display: 'flex',
-    borderBottom: '1px solid #1F2937',
+    borderBottom: `1px solid ${theme.colors.border}`,
     marginBottom: '1.5rem',
   },
   tabActive: {
@@ -362,9 +367,9 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '0.625rem',
     background: 'none',
     border: 'none',
-    borderBottom: '2px solid #38BDF8',
-    color: '#F9FAFB',
-    fontWeight: 600,
+    borderBottom: `2px solid ${theme.colors.primary}`,
+    color: theme.colors.primary,
+    fontWeight: 700,
     fontSize: '0.875rem',
     cursor: 'pointer',
   },
@@ -374,7 +379,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'none',
     border: 'none',
     borderBottom: '2px solid transparent',
-    color: '#6B7280',
+    color: theme.colors.textMuted,
     fontWeight: 500,
     fontSize: '0.875rem',
     cursor: 'pointer',
@@ -386,55 +391,58 @@ const styles: Record<string, React.CSSProperties> = {
   },
   selectLabel: {
     fontSize: '0.8125rem',
-    fontWeight: 500,
-    color: '#D1D5DB',
+    fontWeight: 600,
+    color: theme.colors.textPrimary,
   },
   select: {
     width: '100%',
     padding: '0.625rem 0.875rem',
-    backgroundColor: '#090D16',
-    border: '1px solid #1F2937',
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.borderDark}`,
     borderRadius: '0.5rem',
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
     fontSize: '0.875rem',
     outline: 'none',
     boxSizing: 'border-box',
+    boxShadow: theme.shadows.xs,
   },
   switchLink: {
     background: 'none',
     border: 'none',
-    color: '#38BDF8',
+    color: theme.colors.primary,
     fontSize: '0.8125rem',
     cursor: 'pointer',
     padding: '0.25rem',
     fontWeight: 600,
   },
   successBanner: {
-    backgroundColor: '#064E3B',
-    border: '1px solid #059669',
+    backgroundColor: theme.colors.successBg,
+    border: `1px solid ${theme.colors.successBorder}`,
     borderRadius: '0.5rem',
     padding: '0.75rem',
     fontSize: '0.75rem',
-    color: '#34D399',
+    color: theme.colors.successText,
     marginBottom: '1rem',
     textAlign: 'center',
+    fontWeight: 500,
   },
   errorBanner: {
-    backgroundColor: '#450A0A',
-    border: '1px solid #991B1B',
+    backgroundColor: theme.colors.dangerBg,
+    border: `1px solid ${theme.colors.dangerBorder}`,
     borderRadius: '0.5rem',
     padding: '0.75rem',
     fontSize: '0.75rem',
-    color: '#F87171',
+    color: theme.colors.dangerText,
     marginBottom: '1rem',
+    fontWeight: 500,
   },
   footer: {
     marginTop: '1.5rem',
-    borderTop: '1px solid #1F2937',
+    borderTop: `1px solid ${theme.colors.borderLight}`,
     paddingTop: '1rem',
     textAlign: 'center',
     fontSize: '0.75rem',
-    color: '#9CA3AF',
+    color: theme.colors.textMuted,
     lineHeight: 1.4,
   },
 };

@@ -80,7 +80,7 @@ export default function App() {
 const styles: Record<string, React.CSSProperties> = {
   landingContainer: {
     minHeight: '100vh',
-    backgroundColor: '#090D16',
+    backgroundColor: '#F8FAFC',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -90,7 +90,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   centerContainer: {
     minHeight: '100vh',
-    backgroundColor: '#090D16',
+    backgroundColor: '#F8FAFC',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -100,7 +100,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   loadingText: {
     marginTop: '1rem',
-    color: '#9CA3AF',
+    color: '#64748B',
     fontSize: '0.875rem',
   },
 };

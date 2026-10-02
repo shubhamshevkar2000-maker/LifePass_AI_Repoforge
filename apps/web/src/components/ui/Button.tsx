@@ -1,5 +1,6 @@
 import React from 'react';
 import { Spinner } from './Spinner';
+import { theme } from '../../styles/theme';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
@@ -45,26 +46,28 @@ export const Button: React.FC<ButtonProps> = ({
   // Variant color styles
   const variantStyles: Record<string, React.CSSProperties> = {
     primary: {
-      backgroundColor: '#38BDF8',
-      color: '#090D16',
-      border: '1px solid #38BDF8',
-      fontWeight: 700,
+      backgroundColor: theme.colors.primary,
+      color: theme.colors.textInverse,
+      border: `1px solid ${theme.colors.primary}`,
+      fontWeight: 600,
+      boxShadow: '0 1px 2px 0 rgba(37, 99, 235, 0.2)',
     },
     secondary: {
-      backgroundColor: '#1E293B',
-      color: '#F9FAFB',
-      border: '1px solid #334155',
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.textPrimary,
+      border: `1px solid ${theme.colors.borderDark}`,
       fontWeight: 600,
+      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     },
     danger: {
-      backgroundColor: '#DC2626',
-      color: '#FFFFFF',
-      border: '1px solid #DC2626',
+      backgroundColor: theme.colors.danger,
+      color: theme.colors.textInverse,
+      border: `1px solid ${theme.colors.danger}`,
       fontWeight: 600,
     },
     ghost: {
       backgroundColor: 'transparent',
-      color: '#9CA3AF',
+      color: theme.colors.textSecondary,
       border: '1px solid transparent',
       fontWeight: 600,
     },
@@ -77,7 +80,7 @@ export const Button: React.FC<ButtonProps> = ({
     borderRadius: '0.5rem',
     cursor: isActionDisabled ? 'not-allowed' : 'pointer',
     opacity: isActionDisabled ? 0.6 : 1,
-    transition: 'background-color 0.15s ease, opacity 0.15s ease, border-color 0.15s ease',
+    transition: 'background-color 0.15s ease, opacity 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
     outline: 'none',
     boxSizing: 'border-box',
     width: fullWidth ? '100%' : 'auto',
@@ -86,6 +89,11 @@ export const Button: React.FC<ButtonProps> = ({
     ...variantStyles[variant],
     ...style,
   };
+
+  const spinnerColor =
+    variant === 'primary' || variant === 'danger'
+      ? theme.colors.textInverse
+      : theme.colors.primary;
 
   return (
     <button
@@ -99,7 +107,7 @@ export const Button: React.FC<ButtonProps> = ({
       {isLoading && (
         <Spinner
           size={size === 'lg' ? 'md' : 'sm'}
-          color={variant === 'primary' ? '#090D16' : '#38BDF8'}
+          color={spinnerColor}
         />
       )}
       {!isLoading && icon && <span style={{ display: 'inline-flex' }}>{icon}</span>}

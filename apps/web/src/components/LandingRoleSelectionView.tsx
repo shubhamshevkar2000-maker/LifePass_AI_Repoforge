@@ -3,6 +3,7 @@ import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { useInstitutionAuth } from '../context/InstitutionAuthContext';
+import { theme } from '../styles/theme';
 
 export const LandingRoleSelectionView: React.FC = () => {
   const { setSelectedPortal } = useInstitutionAuth();
@@ -11,13 +12,15 @@ export const LandingRoleSelectionView: React.FC = () => {
     <div style={styles.container}>
       {/* Header Banner */}
       <div style={styles.header}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.625rem', marginBottom: '1.25rem' }}>
           <div style={styles.logoMark}>LP</div>
           <span style={styles.brandTitle}>LifePass AI</span>
         </div>
-        <Badge variant="info" size="md" style={{ marginBottom: '1rem' }}>
-          TWO-SIDED RECORD INTELLIGENCE PLATFORM
-        </Badge>
+        <div style={{ marginBottom: '1rem' }}>
+          <Badge variant="info" size="md">
+            TWO-SIDED RECORD INTELLIGENCE PLATFORM
+          </Badge>
+        </div>
         <h1 style={styles.mainHeading}>Choose Your Experience</h1>
         <p style={styles.subHeading}>
           LifePass connects personal record owners with verifying organizations through context-aware AI task
@@ -38,7 +41,7 @@ export const LandingRoleSelectionView: React.FC = () => {
 
           <h2 style={styles.cardTitle}>Personal Records & Life Tasks</h2>
           <p style={styles.cardCopy}>
-            Manage your records, understand what you need, and share only what you approve.
+            Manage your verified records, discover requirements for life goals, and share only what you approve.
           </p>
 
           <div style={styles.featureList}>
@@ -78,7 +81,7 @@ export const LandingRoleSelectionView: React.FC = () => {
 
           <h2 style={styles.cardTitle}>Institution Access Portal</h2>
           <p style={styles.cardCopy}>
-            Request and access authorized records from applicants through LifePass.
+            Request and access authorized records from applicants through LifePass verified workflows.
           </p>
 
           <div style={styles.featureList}>
@@ -123,7 +126,7 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '1000px',
     width: '100%',
     margin: '0 auto',
-    padding: '2rem 1.5rem',
+    padding: '2.5rem 1.5rem',
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
@@ -135,34 +138,34 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '680px',
   },
   logoMark: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '0.5rem',
-    background: 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)',
+    width: '38px',
+    height: '38px',
+    borderRadius: '0.625rem',
+    background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#090D16',
+    color: '#FFFFFF',
     fontWeight: 800,
     fontSize: '1rem',
-    boxShadow: '0 0 16px rgba(56, 189, 248, 0.35)',
+    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
   },
   brandTitle: {
     fontSize: '1.5rem',
     fontWeight: 800,
     letterSpacing: '-0.025em',
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
   },
   mainHeading: {
     fontSize: '2.25rem',
     fontWeight: 800,
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
     letterSpacing: '-0.025em',
-    margin: '0.5rem 0 1rem 0',
+    margin: '0.75rem 0 1rem 0',
   },
   subHeading: {
     fontSize: '1rem',
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     lineHeight: 1.6,
     margin: 0,
   },
@@ -178,9 +181,9 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     padding: '2rem',
     borderRadius: '1rem',
-    backgroundColor: '#111827',
-    border: '1px solid #1F2937',
-    transition: 'border-color 0.2s ease, transform 0.2s ease',
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.border}`,
+    boxShadow: theme.shadows.md,
   },
   cardHeader: {
     display: 'flex',
@@ -194,12 +197,12 @@ const styles: Record<string, React.CSSProperties> = {
   cardTitle: {
     fontSize: '1.375rem',
     fontWeight: 700,
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
     margin: '0 0 0.5rem 0',
   },
   cardCopy: {
     fontSize: '0.875rem',
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     lineHeight: 1.5,
     margin: '0 0 1.5rem 0',
   },
@@ -214,11 +217,11 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'flex-start',
     gap: '0.625rem',
     fontSize: '0.8125rem',
-    color: '#D1D5DB',
+    color: theme.colors.textSecondary,
     lineHeight: 1.4,
   },
   checkIcon: {
-    color: '#34D399',
+    color: theme.colors.success,
     fontWeight: 700,
     fontSize: '0.875rem',
   },
@@ -227,13 +230,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   footer: {
     textAlign: 'center',
-    borderTop: '1px solid #1F2937',
+    borderTop: `1px solid ${theme.colors.border}`,
     paddingTop: '1.5rem',
     width: '100%',
   },
   footerText: {
     fontSize: '0.75rem',
-    color: '#6B7280',
+    color: theme.colors.textMuted,
     margin: 0,
   },
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { theme } from '../../styles/theme';
 
 export interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: React.ReactNode;
@@ -21,8 +22,8 @@ export const Card: React.FC<CardProps> = ({
   const paddingMap = {
     none: '0',
     sm: '1rem',
-    md: '1.5rem',
-    lg: '2rem',
+    md: '1.25rem',
+    lg: '1.75rem',
   };
 
   const hasHeader = Boolean(title || subtitle || headerAction);
@@ -30,9 +31,10 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       style={{
-        backgroundColor: '#111827',
-        border: '1px solid #1F2937',
+        backgroundColor: theme.colors.surface,
+        border: `1px solid ${theme.colors.border}`,
         borderRadius: '0.75rem',
+        boxShadow: theme.shadows.sm,
         boxSizing: 'border-box',
         overflow: 'hidden',
         display: 'flex',
@@ -50,7 +52,7 @@ export const Card: React.FC<CardProps> = ({
             alignItems: 'flex-start',
             justifyContent: 'space-between',
             gap: '1rem',
-            borderBottom: children ? '1px solid #1F2937' : 'none',
+            borderBottom: children ? `1px solid ${theme.colors.borderLight}` : 'none',
           }}
         >
           <div>
@@ -59,7 +61,7 @@ export const Card: React.FC<CardProps> = ({
                 style={{
                   fontSize: '1rem',
                   fontWeight: 700,
-                  color: '#F9FAFB',
+                  color: theme.colors.textPrimary,
                   margin: 0,
                   lineHeight: 1.3,
                 }}
@@ -71,7 +73,7 @@ export const Card: React.FC<CardProps> = ({
               <p
                 style={{
                   fontSize: '0.8125rem',
-                  color: '#9CA3AF',
+                  color: theme.colors.textSecondary,
                   margin: '0.25rem 0 0 0',
                   lineHeight: 1.4,
                 }}
@@ -100,8 +102,8 @@ export const Card: React.FC<CardProps> = ({
           style={{
             padding: paddingMap[padding],
             paddingTop: '0.75rem',
-            borderTop: '1px solid #1F2937',
-            backgroundColor: '#0E1524',
+            borderTop: `1px solid ${theme.colors.borderLight}`,
+            backgroundColor: theme.colors.surfaceSubtle,
           }}
         >
           {footer}

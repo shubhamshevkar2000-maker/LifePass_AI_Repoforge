@@ -1,5 +1,6 @@
 import React from 'react';
 import { Spinner } from './Spinner';
+import { theme } from '../../styles/theme';
 
 export interface TableColumn {
   key: string;
@@ -29,8 +30,9 @@ export const Table: React.FC<TableProps> = ({
         width: '100%',
         overflowX: 'auto',
         borderRadius: '0.5rem',
-        border: '1px solid #1F2937',
-        backgroundColor: '#111827',
+        border: `1px solid ${theme.colors.border}`,
+        backgroundColor: theme.colors.surface,
+        boxShadow: theme.shadows.xs,
         boxSizing: 'border-box',
       }}
     >
@@ -45,8 +47,8 @@ export const Table: React.FC<TableProps> = ({
         <thead>
           <tr
             style={{
-              backgroundColor: '#1E293B',
-              borderBottom: '1px solid #334155',
+              backgroundColor: theme.colors.surfaceSubtle,
+              borderBottom: `1px solid ${theme.colors.border}`,
             }}
           >
             {columns.map((col) => (
@@ -58,7 +60,7 @@ export const Table: React.FC<TableProps> = ({
                   fontSize: '0.6875rem',
                   textTransform: 'uppercase',
                   letterSpacing: '0.05em',
-                  color: '#9CA3AF',
+                  color: theme.colors.textSecondary,
                   textAlign: col.align || 'left',
                   width: col.width || 'auto',
                 }}
@@ -76,7 +78,7 @@ export const Table: React.FC<TableProps> = ({
                 style={{
                   padding: '3rem 1rem',
                   textAlign: 'center',
-                  color: '#9CA3AF',
+                  color: theme.colors.textMuted,
                 }}
               >
                 <Spinner size="md" label="Loading table records..." />
@@ -91,7 +93,7 @@ export const Table: React.FC<TableProps> = ({
                 style={{
                   padding: '3rem 1rem',
                   textAlign: 'center',
-                  color: '#6B7280',
+                  color: theme.colors.textMuted,
                   fontSize: '0.875rem',
                 }}
               >

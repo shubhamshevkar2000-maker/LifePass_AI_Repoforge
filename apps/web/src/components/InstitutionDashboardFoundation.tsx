@@ -1,5 +1,7 @@
 import React from 'react';
 import { useInstitutionAuth } from '../context/InstitutionAuthContext';
+import { Badge } from './ui/Badge';
+import { theme } from '../styles/theme';
 
 export interface InstitutionDashboardFoundationProps {
   embedded?: boolean;
@@ -80,7 +82,9 @@ export const InstitutionDashboardFoundation: React.FC<InstitutionDashboardFounda
     <div style={styles.container}>
       <header style={styles.header}>
         <div>
-          <div style={styles.badgeSuccess}>INSTITUTION SESSION VERIFIED</div>
+          <Badge variant="success" size="sm" style={{ marginBottom: '0.25rem' }}>
+            INSTITUTION SESSION VERIFIED
+          </Badge>
           <h1 style={styles.orgTitle}>
             {activeMembership?.institution?.name || 'Verified Institution'}
           </h1>
@@ -101,54 +105,45 @@ export const InstitutionDashboardFoundation: React.FC<InstitutionDashboardFounda
 const styles: Record<string, React.CSSProperties> = {
   container: {
     minHeight: '100vh',
-    backgroundColor: '#090D16',
-    color: '#F9FAFB',
+    backgroundColor: theme.colors.pageBg,
+    color: theme.colors.textPrimary,
     display: 'flex',
     flexDirection: 'column',
   },
   header: {
-    backgroundColor: '#111827',
-    borderBottom: '1px solid #1F2937',
+    backgroundColor: theme.colors.surface,
+    borderBottom: `1px solid ${theme.colors.border}`,
+    boxShadow: theme.shadows.xs,
     padding: '1.25rem 2rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  badgeSuccess: {
-    display: 'inline-block',
-    backgroundColor: '#064E3B',
-    border: '1px solid #059669',
-    borderRadius: '0.375rem',
-    padding: '0.2rem 0.5rem',
-    fontSize: '0.625rem',
-    fontWeight: 700,
-    color: '#34D399',
-    letterSpacing: '0.05em',
-    marginBottom: '0.25rem',
-  },
   orgTitle: {
     fontSize: '1.375rem',
     fontWeight: 700,
+    color: theme.colors.textPrimary,
     margin: '0.25rem 0 0.125rem 0',
   },
   orgSubtitle: {
     fontSize: '0.8125rem',
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     margin: 0,
   },
   roleTag: {
-    color: '#38BDF8',
+    color: theme.colors.primary,
     fontWeight: 600,
   },
   signOutBtn: {
-    backgroundColor: 'transparent',
-    border: '1px solid #374151',
-    color: '#D1D5DB',
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.borderDark}`,
+    color: theme.colors.textPrimary,
     borderRadius: '0.5rem',
     padding: '0.5rem 1rem',
     fontSize: '0.8125rem',
     fontWeight: 600,
     cursor: 'pointer',
+    boxShadow: theme.shadows.xs,
   },
   main: {
     padding: '2rem',
@@ -168,55 +163,56 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '1.5rem',
   },
   card: {
-    backgroundColor: '#111827',
-    border: '1px solid #1F2937',
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.border}`,
     borderRadius: '0.75rem',
+    boxShadow: theme.shadows.sm,
     padding: '1.5rem',
   },
   cardTitle: {
     fontSize: '0.9375rem',
     fontWeight: 700,
     margin: '0 0 1rem 0',
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
   },
   cardDesc: {
     fontSize: '0.8125rem',
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     margin: '0 0 0.75rem 0',
   },
   fieldRow: {
     display: 'flex',
     justifyContent: 'space-between',
     padding: '0.5rem 0',
-    borderBottom: '1px solid #1F2937',
+    borderBottom: `1px solid ${theme.colors.borderLight}`,
     fontSize: '0.8125rem',
   },
   fieldLabel: {
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
   },
   fieldValue: {
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
     fontWeight: 600,
   },
   fieldValueMono: {
-    color: '#38BDF8',
-    fontFamily: 'monospace',
+    color: theme.colors.primary,
+    fontFamily: theme.typography.fontMono,
     fontSize: '0.75rem',
   },
   statusActive: {
-    color: '#34D399',
+    color: theme.colors.success,
     fontWeight: 700,
   },
   list: {
     margin: 0,
     paddingLeft: '1.25rem',
     fontSize: '0.8125rem',
-    color: '#D1D5DB',
+    color: theme.colors.textSecondary,
     lineHeight: '1.6',
   },
   banner: {
-    backgroundColor: '#1E293B',
-    border: '1px solid #334155',
+    backgroundColor: theme.colors.surfaceAccent,
+    border: `1px solid ${theme.colors.primaryBorder}`,
     borderRadius: '0.75rem',
     padding: '1.25rem',
     marginBottom: '1.5rem',
@@ -224,25 +220,26 @@ const styles: Record<string, React.CSSProperties> = {
   bannerTitle: {
     fontSize: '0.875rem',
     fontWeight: 700,
-    color: '#38BDF8',
+    color: theme.colors.primary,
     marginBottom: '0.25rem',
   },
   bannerText: {
     fontSize: '0.8125rem',
-    color: '#CBD5E1',
+    color: theme.colors.textSecondary,
     lineHeight: '1.5',
     margin: 0,
   },
   multiOrg: {
-    backgroundColor: '#111827',
-    border: '1px solid #1F2937',
+    backgroundColor: theme.colors.surface,
+    border: `1px solid ${theme.colors.border}`,
     borderRadius: '0.75rem',
+    boxShadow: theme.shadows.xs,
     padding: '1rem',
   },
   multiOrgTitle: {
     fontSize: '0.8125rem',
     fontWeight: 700,
-    color: '#9CA3AF',
+    color: theme.colors.textSecondary,
     margin: '0 0 0.5rem 0',
   },
   multiOrgList: {
@@ -251,10 +248,11 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   multiOrgItem: {
-    backgroundColor: '#1E293B',
+    backgroundColor: theme.colors.neutralBg,
+    border: `1px solid ${theme.colors.border}`,
     borderRadius: '0.375rem',
     padding: '0.25rem 0.5rem',
     fontSize: '0.75rem',
-    color: '#F9FAFB',
+    color: theme.colors.textPrimary,
   },
 };

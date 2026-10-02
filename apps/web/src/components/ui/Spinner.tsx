@@ -1,4 +1,5 @@
 import React from 'react';
+import { theme } from '../../styles/theme';
 
 export interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -9,7 +10,7 @@ export interface SpinnerProps {
 
 export const Spinner: React.FC<SpinnerProps> = ({
   size = 'md',
-  color = '#38BDF8',
+  color = theme.colors.primary,
   label = 'Loading...',
   className = '',
 }) => {
@@ -42,7 +43,7 @@ export const Spinner: React.FC<SpinnerProps> = ({
           cx="12"
           cy="12"
           r="10"
-          stroke="#1F2937"
+          stroke={theme.colors.border}
           strokeWidth={strokeWidth}
         />
         <path

@@ -1,4 +1,5 @@
 import React, { useId } from 'react';
+import { theme } from '../../styles/theme';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -39,14 +40,14 @@ export const Input: React.FC<InputProps> = ({
           style={{
             fontSize: '0.8125rem',
             fontWeight: 600,
-            color: '#E5E7EB',
+            color: theme.colors.textPrimary,
             display: 'flex',
             alignItems: 'center',
             gap: '0.25rem',
           }}
         >
           <span>{label}</span>
-          {required && <span style={{ color: '#EF4444' }}>*</span>}
+          {required && <span style={{ color: theme.colors.danger }}>*</span>}
         </label>
       )}
 
@@ -57,18 +58,19 @@ export const Input: React.FC<InputProps> = ({
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : hint ? hintId : undefined}
         style={{
-          backgroundColor: '#090D16',
-          border: `1px solid ${error ? '#EF4444' : '#374151'}`,
+          backgroundColor: theme.colors.surface,
+          border: `1px solid ${error ? theme.colors.danger : theme.colors.borderDark}`,
           borderRadius: '0.5rem',
           padding: '0.625rem 0.875rem',
-          color: '#F9FAFB',
+          color: theme.colors.textPrimary,
           fontSize: '0.875rem',
           outline: 'none',
           boxSizing: 'border-box',
           width: '100%',
           opacity: disabled ? 0.6 : 1,
           cursor: disabled ? 'not-allowed' : 'text',
-          transition: 'border-color 0.15s ease',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+          boxShadow: theme.shadows.xs,
           ...style,
         }}
         {...props}
@@ -80,7 +82,7 @@ export const Input: React.FC<InputProps> = ({
           role="alert"
           style={{
             fontSize: '0.75rem',
-            color: '#F87171',
+            color: theme.colors.dangerText,
             fontWeight: 500,
           }}
         >
@@ -93,7 +95,7 @@ export const Input: React.FC<InputProps> = ({
           id={hintId}
           style={{
             fontSize: '0.6875rem',
-            color: '#6B7280',
+            color: theme.colors.textMuted,
           }}
         >
           {hint}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { theme } from '../../styles/theme';
 
 export interface HeaderProps {
   institutionName?: string;
@@ -41,14 +42,14 @@ export const Header: React.FC<HeaderProps> = ({
               width: '28px',
               height: '28px',
               borderRadius: '0.375rem',
-              background: 'linear-gradient(135deg, #0284C7 0%, #38BDF8 100%)',
+              background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 800,
               fontSize: '0.8125rem',
-              color: '#090D16',
-              boxShadow: '0 0 10px rgba(56, 189, 248, 0.3)',
+              color: '#FFFFFF',
+              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
             }}
           >
             LP
@@ -60,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
                   fontSize: '1rem',
                   fontWeight: 800,
                   letterSpacing: '-0.02em',
-                  color: '#F9FAFB',
+                  color: theme.colors.textPrimary,
                 }}
               >
                 LifePass AI
@@ -84,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
             style={{
               fontSize: '0.8125rem',
               fontWeight: 700,
-              color: '#F9FAFB',
+              color: theme.colors.textPrimary,
               maxWidth: '220px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -100,19 +101,19 @@ export const Header: React.FC<HeaderProps> = ({
         <div
           className="lifepass-header-officer-text"
           style={{
-            borderLeft: '1px solid #1F2937',
+            borderLeft: `1px solid ${theme.colors.border}`,
             paddingLeft: '1rem',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-end',
           }}
         >
-          <span style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>Officer</span>
+          <span style={{ fontSize: '0.75rem', color: theme.colors.textMuted }}>Officer</span>
           <span
             style={{
               fontSize: '0.8125rem',
               fontWeight: 600,
-              color: '#E5E7EB',
+              color: theme.colors.textPrimary,
             }}
           >
             {userPhone || userRole}

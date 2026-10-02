@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
+import { theme } from '../../styles/theme';
 
 export interface NavItem {
   id: string;
@@ -48,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {/* Top CTA: Create Request */}
-          <div style={{ paddingBottom: '0.5rem', borderBottom: '1px solid #1F2937' }}>
+          <div style={{ paddingBottom: '0.5rem', borderBottom: `1px solid ${theme.colors.borderLight}` }}>
             <Button
               variant="primary"
               size="md"
@@ -98,13 +99,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div
           style={{
             paddingTop: '1rem',
-            borderTop: '1px solid #1F2937',
+            borderTop: `1px solid ${theme.colors.borderLight}`,
             fontSize: '0.6875rem',
-            color: '#6B7280',
+            color: theme.colors.textMuted,
             lineHeight: 1.4,
           }}
         >
-          <div style={{ fontWeight: 600, color: '#9CA3AF', marginBottom: '0.25rem' }}>
+          <div style={{ fontWeight: 600, color: theme.colors.textSecondary, marginBottom: '0.25rem' }}>
             Portal Preview Active
           </div>
           <div>Secure institution access will be connected during final platform integration.</div>

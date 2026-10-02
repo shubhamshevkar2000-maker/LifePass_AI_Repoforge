@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { theme } from '../../styles/theme';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -56,8 +57,8 @@ export const Modal: React.FC<ModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(9, 13, 22, 0.75)',
-        backdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(15, 23, 42, 0.4)',
+        backdropFilter: 'blur(2px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -74,15 +75,15 @@ export const Modal: React.FC<ModalProps> = ({
         aria-describedby={description ? 'modal-description' : undefined}
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: '#111827',
-          border: '1px solid #1F2937',
+          backgroundColor: theme.colors.surface,
+          border: `1px solid ${theme.colors.border}`,
           borderRadius: '0.75rem',
           maxWidth,
           width: '100%',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)',
+          boxShadow: theme.shadows.lg,
           overflow: 'hidden',
           boxSizing: 'border-box',
         }}
@@ -91,7 +92,7 @@ export const Modal: React.FC<ModalProps> = ({
         <div
           style={{
             padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid #1F2937',
+            borderBottom: `1px solid ${theme.colors.borderLight}`,
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'space-between',
@@ -104,7 +105,7 @@ export const Modal: React.FC<ModalProps> = ({
               style={{
                 fontSize: '1.125rem',
                 fontWeight: 700,
-                color: '#F9FAFB',
+                color: theme.colors.textPrimary,
                 margin: 0,
               }}
             >
@@ -115,7 +116,7 @@ export const Modal: React.FC<ModalProps> = ({
                 id="modal-description"
                 style={{
                   fontSize: '0.8125rem',
-                  color: '#9CA3AF',
+                  color: theme.colors.textSecondary,
                   margin: '0.25rem 0 0 0',
                   lineHeight: 1.4,
                 }}
@@ -131,7 +132,7 @@ export const Modal: React.FC<ModalProps> = ({
             style={{
               background: 'none',
               border: 'none',
-              color: '#9CA3AF',
+              color: theme.colors.textMuted,
               fontSize: '1.25rem',
               cursor: 'pointer',
               padding: '0.25rem',
@@ -152,7 +153,7 @@ export const Modal: React.FC<ModalProps> = ({
             padding: '1.5rem',
             overflowY: 'auto',
             flex: 1,
-            color: '#D1D5DB',
+            color: theme.colors.textSecondary,
             fontSize: '0.875rem',
             lineHeight: 1.5,
           }}
@@ -165,8 +166,8 @@ export const Modal: React.FC<ModalProps> = ({
           <div
             style={{
               padding: '1rem 1.5rem',
-              borderTop: '1px solid #1F2937',
-              backgroundColor: '#090D16',
+              borderTop: `1px solid ${theme.colors.borderLight}`,
+              backgroundColor: theme.colors.surfaceSubtle,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',

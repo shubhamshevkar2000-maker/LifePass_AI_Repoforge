@@ -1,4 +1,5 @@
 import React from 'react';
+import { theme } from '../../styles/theme';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
@@ -28,29 +29,29 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantStyles: Record<string, React.CSSProperties> = {
     neutral: {
-      backgroundColor: '#1E293B',
-      border: '1px solid #334155',
-      color: '#CBD5E1',
+      backgroundColor: theme.colors.neutralBg,
+      border: `1px solid ${theme.colors.neutralBorder}`,
+      color: theme.colors.neutralText,
     },
     success: {
-      backgroundColor: '#064E3B',
-      border: '1px solid #059669',
-      color: '#34D399',
+      backgroundColor: theme.colors.successBg,
+      border: `1px solid ${theme.colors.successBorder}`,
+      color: theme.colors.successText,
     },
     warning: {
-      backgroundColor: '#3B2900',
-      border: '1px solid #78350F',
-      color: '#FDE68A',
+      backgroundColor: theme.colors.warningBg,
+      border: `1px solid ${theme.colors.warningBorder}`,
+      color: theme.colors.warningText,
     },
     danger: {
-      backgroundColor: '#450A0A',
-      border: '1px solid #991B1B',
-      color: '#F87171',
+      backgroundColor: theme.colors.dangerBg,
+      border: `1px solid ${theme.colors.dangerBorder}`,
+      color: theme.colors.dangerText,
     },
     info: {
-      backgroundColor: '#082F49',
-      border: '1px solid #0284C7',
-      color: '#38BDF8',
+      backgroundColor: theme.colors.infoBg,
+      border: `1px solid ${theme.colors.infoBorder}`,
+      color: theme.colors.infoText,
     },
   };
 
