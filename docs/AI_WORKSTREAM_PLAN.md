@@ -113,21 +113,22 @@ AI-3: Semantic Retrieval + Matching Assistance (FAISS Indexing, Candidate Matchi
 AI-4: Full Integration + Hardening (Prompt Defense, Performance, Golden Path QA)
 ```
 
-### Stage AI-0 — Audit + Contracts (Current Stage)
+### Stage AI-0 — Audit + Contracts (Complete)
 - Audit repository, specifications, and environment.
 - Establish typed Pydantic contract schemas in `services/ai/app/schemas/`.
 - Establish `docs/AI_WORKSTREAM_PLAN.md` and `docs/AI_BACKEND_REQUESTS.md`.
 - Implement schema verification tests.
-- **Milestone:** Contracts locked, clean baseline ready for parallel development.
+- **Milestone:** Contracts locked, clean baseline ready for parallel development. (Status: **COMPLETE**)
 
-### Stage AI-1 — Document Intelligence Foundation
-- Install approved document processing libraries (`PyMuPDF`, `pytesseract`/`easyocr`).
-- Implement file intake validation (MIME types, size, corruption check).
+### Stage AI-1 — Document Intelligence Foundation (Complete)
+- Install approved document processing libraries (`PyMuPDF`, `pytesseract`, `Pillow`).
+- Implement file intake validation (MIME types, size, magic bytes, structural integrity).
 - Implement OCR pipeline extracting observable text into `extracted_text`.
 - Implement rule- and pattern-assisted document classification into `DocumentType` with confidence scoring.
-- Implement structured metadata extraction (`holder_name`, `issuer_name`, `issue_date`, `expiry_date`, `document_number`).
+- Implement structured metadata extraction (`holder_name`, `issuer_name`, `issue_date`, `expiry_date`, `document_number`, `academic_year`).
 - Route low-confidence results (< 0.70) to `needs_review`.
-- **Milestone:** Given an uploaded document, produce a validated `DocumentProcessingResult`.
+- Verified local Tesseract 5.4.0.20240606 integration and Arial OCR test.
+- **Milestone:** Given an uploaded document, produce a validated `DocumentProcessingResult`. (Status: **COMPLETE**)
 
 ### Stage AI-2 — Life-Stage Context Engine
 - Configure Groq Cloud LLM provider (`llama3-70b-8192` or approved model) via LangChain / HTTP client.

@@ -5,6 +5,8 @@ Reference: docs/DOCUMENT_PIPELINE.md Section 5 ("OCR")
 """
 
 import io
+import os
+import shutil
 from typing import Optional, Protocol, runtime_checkable
 from pydantic import BaseModel, Field
 from PIL import Image
@@ -46,6 +48,11 @@ class TesseractOcrAdapter:
     def __init__(self, tesseract_cmd: Optional[str] = None):
         if tesseract_cmd:
             pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+        else:
+            if not shutil.which(pytesseract.pytesseract.tesseract_cmd):
+                windows_default = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+                if os.path.exists(windows_default):
+                    pytesseract.pytesseract.tesseract_cmd = windows_default
         self._available: Optional[bool] = None
 
     def is_available(self) -> bool:

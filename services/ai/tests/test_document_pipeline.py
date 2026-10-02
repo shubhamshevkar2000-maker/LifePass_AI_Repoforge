@@ -189,13 +189,12 @@ def test_ocr_required_detection_on_scanned_pdf():
 def test_ocr_failure_handling_when_engine_unavailable():
     """H: When external OCR binary is unavailable, extraction reports failure explicitly without fabricating text."""
     scanned_bytes = make_synthetic_scanned_pdf()
-    res = extract_document_text(scanned_bytes, "application/pdf")
-    # In this environment, tesseract.exe is not installed on PATH
-    if not OcrAdapter.is_available():
-        assert res.success is False
-        assert res.ocr_result is not None
-        assert res.ocr_result.error_code == "OCR_ENGINE_UNAVAILABLE"
-        assert res.normalized_text == ""  # Never fabricated
+    unavailable_adapter = TesseractOcrAdapter(tesseract_cmd="non_existent_tesseract_binary")
+    res = extract_document_text(scanned_bytes, "application/pdf", ocr_engine=unavailable_adapter)
+    assert res.success is False
+    assert res.ocr_result is not None
+    assert res.ocr_result.error_code == "OCR_ENGINE_UNAVAILABLE"
+    assert res.normalized_text == ""  # Never fabricated
 
 
 def test_ocr_success_with_adapter():

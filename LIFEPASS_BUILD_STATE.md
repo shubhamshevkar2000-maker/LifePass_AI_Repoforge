@@ -629,8 +629,8 @@ Phase 1 implementation, migrations, RLS policies, automated runtime verification
 - **Workstream:** Workstream 2 — AI + Document Intelligence
 - **Stage:** AI-1 — Document Intelligence Foundation
 - **Branch:** `feature/ai`
-- **Status:** **AI-1 PARTIAL**  
-  *(All code, pipeline modules, schema bindings, normalization, heuristic classification, observable metadata extraction, prompt-injection isolation, and 24 automated tests are fully IMPLEMENTED and VERIFIED. Status is designated PARTIAL solely due to the absence of the external Tesseract OCR binary on the local Windows host environment).*
+- **Status:** **AI-1 COMPLETE**  
+  *(All code, pipeline modules, schema bindings, normalization, heuristic classification, observable metadata extraction, prompt-injection isolation, and 24 automated tests are fully IMPLEMENTED and VERIFIED. The previous environment blocker regarding the Tesseract OCR binary has been fully resolved and independently verified with real OCR extraction).*
 - **Objective:** Implement the document intelligence foundation covering file intake validation, PDF text extraction via PyMuPDF, OCR adapter abstraction with graceful degradation, deterministic text normalization, rule-assisted classification, and observable metadata extraction producing validated `DocumentProcessingResult` structures.
 
 ### 2. Implementation Deliverables
@@ -651,7 +651,7 @@ Phase 1 implementation, migrations, RLS policies, automated runtime verification
 
 3. **OCR Engine Adapter Abstraction ([`services/ai/app/document/ocr_adapter.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/app/document/ocr_adapter.py)):**
    - Abstract `OcrAdapter` base class defining `extract_text_from_image` and `is_available()`.
-   - `TesseractOcrAdapter` implementing `pytesseract` binding with dynamic binary lookup (checking `PATH` and `C:\Program Files\Tesseract-OCR\tesseract.exe`).
+   - `TesseractOcrAdapter` implementing `pytesseract` binding with dynamic binary lookup (checking `PATH` and Windows default `C:\Program Files\Tesseract-OCR\tesseract.exe`).
    - Returns structured `OcrResult` envelope with success/failure flags, confidence scores, engine names, and error codes (`OCR_ENGINE_UNAVAILABLE`, `OCR_PROCESSING_FAILED`).
    - Strictly refuses to simulate or fabricate OCR text when the external binary is unavailable.
 
@@ -696,7 +696,7 @@ Phase 1 implementation, migrations, RLS policies, automated runtime verification
 
 ### 3. Automated Test Verification Summary
 - **Document Pipeline Test Suite ([`services/ai/tests/test_document_pipeline.py`](file:///c:/Users/shubh/OneDrive/Desktop/LifePass_AI_RepoForge/services/ai/tests/test_document_pipeline.py)):**
-  - **24/24 PASSED** (0.32s)
+  - **24/24 PASSED** (0.56s)
   - Covers: file validation (valid/invalid/corrupt/oversized/mismatch), text PDF extraction, scanned PDF OCR detection, OCR failure envelope when binary missing, OCR adapter mocking, normalization (whitespace/Unicode/markers), classification (strong/weak/unknown), metadata extraction (present/missing/multi-format dates), full pipeline end-to-end, validation rejection, and prompt injection defense.
 - **Full AI Workstream Pytest Suite:**
   - `test_document_pipeline.py`: **24/24 PASSED**
@@ -709,15 +709,16 @@ Phase 1 implementation, migrations, RLS policies, automated runtime verification
   - `@lifepass/mobile`: `tsc --noEmit` clean (exit 0)
   - `@lifepass/web`: `tsc && vite build` built production bundle in 724ms (exit 0)
 
-### 4. Known Blockers & Environment Requirements
-- **OCR Engine Blocker:** The host system (Windows) does not have the Tesseract OCR executable installed.
-- **Resolution Path:** For production deployment or local OCR runtime testing, install Tesseract OCR binary (e.g. `winget install UB-Mannheim.TesseractOCR` or Docker image with `tesseract-ocr`) and add it to system `PATH`.
-- **Graceful Degradation Verified:** The pipeline detects absence of the binary without crashing or hanging, recording `error_code="OCR_ENGINE_UNAVAILABLE"` in `metadata.raw_fields` and setting status to `NEEDS_REVIEW`.
+### 4. Environment & OCR Verification
+- **Tesseract OCR Binary:** Tesseract 5.4.0.20240606 verified at `C:\Program Files\Tesseract-OCR\tesseract.exe`.
+- **Python / pytesseract Detection:** `pytesseract.get_tesseract_version()` accurately detects `5.4.0.20240606`.
+- **Real OCR Smoke Test:** Verified end-to-end OCR extraction on synthetic image rendering Arial text, accurately producing `"LifePass Al OCR TEST 2026"`.
+- **Blocker Status:** Fully resolved. Zero blockers remain for Stage AI-1.
 
 ### 5. Next Stage Handoff
 - **Next Stage:** **AI-2 — Life-Stage Context Engine (Groq / Llama 3)**
-- **Prerequisites Met:** AI-0 contracts complete, AI-1 document pipeline and schema integration complete.
-- **Scope for AI-2:** Intent classification service, life-stage task categorization, and Groq API client integration.
+- **Prerequisites Met:** AI-0 contracts complete, AI-1 document intelligence foundation verified and marked complete.
+- **Scope for AI-2:** Intent classification service, life-stage task categorization, prompt layer fences, and Groq API client integration.
 - **Instruction:** Do NOT start AI-2 until explicitly directed.
 
 
