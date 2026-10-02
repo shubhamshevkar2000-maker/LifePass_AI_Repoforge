@@ -105,9 +105,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }}
         >
           <div style={{ fontWeight: 600, color: '#9CA3AF', marginBottom: '0.25rem' }}>
-            RLS Isolation Active
+            Portal Preview Active
           </div>
-          <div>All queries scoped to institution membership.</div>
+          <div>Secure institution access will be connected during final platform integration.</div>
         </div>
       </aside>
     </>

@@ -14,13 +14,13 @@ export const AccessDeniedView: React.FC = () => {
   };
 
   const displayName =
-    user?.user_metadata?.username ||
-    user?.user_metadata?.full_name ||
+    user?.fullName ||
+    user?.username ||
     user?.phone ||
-    user?.id ||
+    user?.userId ||
     'Authenticated Officer';
 
-  const registeredOrg = user?.user_metadata?.institution_name;
+  const registeredOrg = user?.institutionName;
 
   return (
     <div style={styles.card}>
@@ -29,7 +29,7 @@ export const AccessDeniedView: React.FC = () => {
       </Badge>
       <h2 style={styles.title}>Institution Membership Required</h2>
       <p style={styles.subtitle}>
-        You have successfully authenticated via Supabase Auth, but your identity is not registered as an active member of any institution in PostgreSQL.
+        You have successfully authenticated, but your identity is not registered as an active member of any institution.
       </p>
 
       <div style={styles.infoBox}>
@@ -44,8 +44,8 @@ export const AccessDeniedView: React.FC = () => {
           </div>
         )}
         <div style={styles.infoRow}>
-          <span style={styles.infoLabel}>User UUID</span>
-          <span style={styles.infoValueMono}>{user?.id}</span>
+          <span style={styles.infoLabel}>User ID</span>
+          <span style={styles.infoValueMono}>{user?.userId}</span>
         </div>
         <div style={styles.infoRow}>
           <span style={styles.infoLabel}>Membership Status</span>

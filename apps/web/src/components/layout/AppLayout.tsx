@@ -18,10 +18,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
-  const institutionName = activeMembership?.institution?.name || 'Verified Institution';
-  const institutionType = activeMembership?.institution?.type?.toUpperCase() || 'INSTITUTION';
-  const userPhone = user?.user_metadata?.username || user?.user_metadata?.full_name || user?.phone || user?.email || undefined;
-  const userRole = activeMembership?.role?.toUpperCase() || 'OFFICER';
+  const institutionName = activeMembership?.institution?.name || user?.institutionName || 'Verified Institution';
+  const institutionType = activeMembership?.institution?.type || user?.institutionType || 'bank';
+  const userPhone = user?.fullName ? `${user.fullName} (@${user.username})` : user?.username || user?.phone || undefined;
+  const userRole = activeMembership?.role?.toUpperCase() || user?.role || 'OFFICER';
 
   return (
     <div className="lifepass-shell">
@@ -150,7 +150,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #1F2937', fontSize: '0.8125rem' }}>
             <span style={{ color: '#9CA3AF' }}>Requesting Officer</span>
-            <span style={{ color: '#38BDF8', fontFamily: 'monospace' }}>{user?.phone || user?.id}</span>
+            <span style={{ color: '#38BDF8', fontFamily: 'monospace' }}>{user?.username || user?.userId}</span>
           </div>
         </div>
       </Modal>

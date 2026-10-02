@@ -22,7 +22,7 @@ export const InstitutionDashboardFoundation: React.FC<InstitutionDashboardFounda
           </div>
           <div style={styles.fieldRow}>
             <span style={styles.fieldLabel}>User ID</span>
-            <span style={styles.fieldValueMono}>{user?.id}</span>
+            <span style={styles.fieldValueMono}>{user?.userId}</span>
           </div>
           <div style={styles.fieldRow}>
             <span style={styles.fieldLabel}>Membership ID</span>
@@ -34,26 +34,26 @@ export const InstitutionDashboardFoundation: React.FC<InstitutionDashboardFounda
           </div>
         </div>
 
-        {/* Card 2: Security & RLS Isolation */}
+        {/* Card 2: Security & Authorization Architecture */}
         <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Authorization & Boundary Enforcement</h3>
+          <h3 style={styles.cardTitle}>Platform Security Principles</h3>
           <p style={styles.cardDesc}>
-            In accordance with <code>DATABASE_SCHEMA.md</code> and <code>SECURITY_CONSENT.md</code>:
+            Planned architecture for final platform integration:
           </p>
           <ul style={styles.list}>
             <li>Institution access is scoped strictly to data owned by this institution.</li>
-            <li>RLS prevents accessing citizen data without explicit consent.</li>
-            <li>Client-side role promotion is blocked by PostgreSQL constraints.</li>
+            <li>Verification policies prevent accessing citizen data without explicit consent.</li>
+            <li>Database authorization and RLS will be wired during final cross-workstream integration.</li>
           </ul>
         </div>
       </div>
 
       {/* Phase Status Banner */}
       <div style={styles.banner}>
-        <div style={styles.bannerTitle}>Phase W-1 — App Shell & UI Foundation Active</div>
+        <div style={styles.bannerTitle}>Frontend Development Prototype Active</div>
         <p style={styles.bannerText}>
-          Institution phone OTP authentication, database membership verification, and responsive navigation shell are established.
-          Workflow creation, applicant requests, and consented record packages will be connected in Phase W-3+.
+          Institution portal shell, navigation layout, and visual components are active in mock mode.
+          Backend authentication, database models, and live integration will be connected in final integration phases.
         </p>
       </div>
 

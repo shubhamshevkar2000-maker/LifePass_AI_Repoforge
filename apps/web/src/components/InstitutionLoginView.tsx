@@ -6,7 +6,7 @@ import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 
 export const InstitutionLoginView: React.FC = () => {
-  const { login, signUp, error, clearError, isConfigured } = useInstitutionAuth();
+  const { login, signUp, error, clearError } = useInstitutionAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -39,6 +39,8 @@ export const InstitutionLoginView: React.FC = () => {
     }
     if (!loginPassword) {
       errs.password = 'Password is required.';
+    } else if (loginPassword.length < 6) {
+      errs.password = 'Password must be at least 6 characters.';
     }
     setFormErrors(errs);
     return Object.keys(errs).length === 0;
@@ -46,26 +48,31 @@ export const InstitutionLoginView: React.FC = () => {
 
   const validateSignup = (): boolean => {
     const errs: Record<string, string> = {};
-    if (!fullName.trim()) errs.fullName = 'Full Name is required.';
+    if (!fullName.trim()) errs.fullName = 'Officer Full Name is required.';
     if (!institutionName.trim()) errs.institutionName = 'Institution Name is required.';
     if (!institutionType.trim()) errs.institutionType = 'Institution Type is required.';
+    
+    const cleanedPhone = phone.trim().replace(/[\s-]/g, '');
     if (!phone.trim()) {
-      errs.phone = 'Official Phone Number is required.';
-    } else if (phone.trim().replace(/[\s-]/g, '').length < 8) {
+      errs.phone = 'Official Contact Phone is required.';
+    } else if (cleanedPhone.length < 8) {
       errs.phone = 'Please enter a valid phone number with country code.';
     }
+
     if (!signupUsername.trim()) {
-      errs.signupUsername = 'Username is required.';
+      errs.signupUsername = 'Portal Username is required.';
     } else if (signupUsername.trim().length < 3) {
       errs.signupUsername = 'Username must be at least 3 characters.';
     } else if (!/^[a-zA-Z0-9_.-]+$/.test(signupUsername.trim())) {
       errs.signupUsername = 'Username may only contain letters, numbers, underscores, and dashes.';
     }
+
     if (!signupPassword) {
       errs.signupPassword = 'Password is required.';
     } else if (signupPassword.length < 6) {
       errs.signupPassword = 'Password must be at least 6 characters.';
     }
+
     if (!confirmPassword) {
       errs.confirmPassword = 'Confirmation password is required.';
     } else if (confirmPassword !== signupPassword) {
@@ -84,12 +91,8 @@ export const InstitutionLoginView: React.FC = () => {
     if (!validateLogin()) return;
 
     setIsSubmitting(true);
-    const res = await login(loginUsername, loginPassword);
+    await login(loginUsername, loginPassword);
     setIsSubmitting(false);
-
-    if (!res.success && res.error) {
-      // Error handled by context
-    }
   };
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
@@ -110,10 +113,8 @@ export const InstitutionLoginView: React.FC = () => {
     });
     setIsSubmitting(false);
 
-    if (res.success && res.error) {
-      setSuccessNotice(res.error);
-      setMode('login');
-      setLoginUsername(signupUsername);
+    if (res.success) {
+      setSuccessNotice('Institution account registered successfully.');
     }
   };
 
@@ -130,7 +131,7 @@ export const InstitutionLoginView: React.FC = () => {
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <Badge variant="info" size="sm" style={{ marginBottom: '0.75rem' }}>
-          INSTITUTION PORTAL AUTHENTICATION
+          INSTITUTION PORTAL
         </Badge>
         <h1
           style={{
@@ -197,24 +198,6 @@ export const InstitutionLoginView: React.FC = () => {
         </button>
       </div>
 
-      {/* Configuration Notice */}
-      {!isConfigured && (
-        <div
-          style={{
-            backgroundColor: '#3B2900',
-            border: '1px solid #78350F',
-            borderRadius: '0.5rem',
-            padding: '0.75rem',
-            fontSize: '0.75rem',
-            color: '#FDE68A',
-            marginBottom: '1rem',
-            lineHeight: 1.4,
-          }}
-        >
-          <strong>Configuration Notice:</strong> <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> are not configured. Live Supabase credentials are required.
-        </div>
-      )}
-
       {/* Success Notice */}
       {successNotice && (
         <div
@@ -233,7 +216,7 @@ export const InstitutionLoginView: React.FC = () => {
         </div>
       )}
 
-      {/* Global Context Error */}
+      {/* Global Error Banner */}
       {error && (
         <div
           style={{
@@ -292,7 +275,7 @@ export const InstitutionLoginView: React.FC = () => {
             isLoading={isSubmitting}
             style={{ marginTop: '0.5rem' }}
           >
-            Sign In to Portal
+            Sign In
           </Button>
 
           <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
@@ -308,7 +291,7 @@ export const InstitutionLoginView: React.FC = () => {
                 fontWeight: 600,
               }}
             >
-              Don't have an institution account? Register here →
+              Register Institution / Create Account →
             </button>
           </div>
         </form>
@@ -443,7 +426,7 @@ export const InstitutionLoginView: React.FC = () => {
             isLoading={isSubmitting}
             style={{ marginTop: '0.5rem' }}
           >
-            Register Institution Account
+            Register Institution
           </Button>
 
           <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
@@ -465,19 +448,19 @@ export const InstitutionLoginView: React.FC = () => {
         </form>
       )}
 
-      {/* Security Footer Notice */}
+      {/* Neutral Footer Notice */}
       <div
         style={{
           marginTop: '1.5rem',
           borderTop: '1px solid #1F2937',
           paddingTop: '1rem',
           textAlign: 'center',
-          fontSize: '0.6875rem',
-          color: '#6B7280',
+          fontSize: '0.75rem',
+          color: '#9CA3AF',
           lineHeight: 1.4,
         }}
       >
-        Authentication is enforced by Supabase Auth. In accordance with LifePass security boundaries, access to sensitive applicant records requires verified membership registered in PostgreSQL.
+        Secure institution access will be connected during final platform integration.
       </div>
     </Card>
   );
