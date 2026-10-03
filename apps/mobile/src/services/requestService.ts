@@ -60,7 +60,8 @@ export async function fetchCitizenRequests(
       });
 
       if (response.ok) {
-        const data = (await response.json()) as CitizenRequest[];
+        const json = await response.json();
+        const data = json.requests as CitizenRequest[];
         return { data, error: null, isDevFixture: false };
       }
 
@@ -126,7 +127,8 @@ export async function fetchCitizenRequestById(
       });
 
       if (response.ok) {
-        const data = (await response.json()) as CitizenRequest;
+        const json = await response.json();
+        const data = json.request as CitizenRequest;
         return { data, error: null, isDevFixture: false };
       }
 

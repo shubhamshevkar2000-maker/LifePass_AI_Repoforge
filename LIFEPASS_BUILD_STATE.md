@@ -950,3 +950,108 @@ Phase 1 implementation, migrations, RLS policies, automated runtime verification
 
 
 
+
+
+## Web Auth Enhancement (Hackathon)
+IMPLEMENTED: Google OAuth, Phone Login UI Update, Demo Institution Mode.
+VERIFIED: Web builds successfully, no mobile files touched.
+
+
+## Web Auth Refactor (Hackathon)
+IMPLEMENTED: Replaced Institution Portal Phone OTP & Google Auth with normal Email/Password authentication using Supabase. Added Registration flow. Maintained active institution_members authorization boundary.
+VERIFIED: Web builds successfully, no mobile files touched.
+
+
+## Citizen Request E2E Integration
+BLOCKED: Missing backend contract for citizen request retrieval.
+REQUIRED: GET /requests and GET /requests/{id} endpoints with authenticated citizen ownership filtering.
+
+
+## Backend Recovery
+BLOCKED: Existing implementation not found in available Git history. The backend citizen request retrieval (GET /requests) was never implemented in any branch.
+
+
+## Phase 7: Citizen Request Retrieval (Backend)
+- **Status**: IMPLEMENTED & VERIFIED
+- **Files Added**: \supabase/functions/requests/index.ts\, \supabase/functions/requests/deno.json\`n- **Files Modified**: \docs/API_CONTRACT.md\, \pps/mobile/src/services/requestService.ts\, \pps/mobile/.env\, \pps/web/.env\`n- **Contract Updates**: Added \GET /requests\ and \GET /requests/{id}\ to API contract.
+- **RLS/Security**: Authenticated citizen ownership enforced via existing \ccess_requests_select_user\ policy. Edge function utilizes user JWT.
+- **Tests Executed**: End-to-end multi-citizen HTTP validation. Verified Citizen A receives only Citizen A requests, Citizen B only receives Citizen B requests, and cross-citizen ID requests correctly yield 404 Not Found.
+- **Remaining Blockers**: None for this specific flow.
+
+
+## Final Audit: Citizen Request Retrieval
+- **Status**: VERIFIED
+- **Security**: Validated strict adherence to RLS (access_requests.user_id = auth.uid()) and proper use of service_role key only for safe enrichment.
+- **Routing**: Validated GET /requests and GET /requests/{id}.
+- **Response Contract**: Validated exact match of {\equests\: [...]} and {\equest\: {...}} against \equestService.ts\.
+- **Env/Secret**: Validated .env files remain untracked and no secrets leaked to frontend apps.
+- **Tests Executed**: Re-ran the two-citizen e2e script and curl unauthenticated testing, returning proper 200, 404, and 401 statuses.
+- **Cleanup**: Deleted temporary local \	est_requests.js\ containing demo credentials.
+
+
+## Local Dev Citizen Login: Email/Password (No OTP)
+- **Status**: IMPLEMENTED & VERIFIED
+- **Auth Changes**: Enabled email/password authentication on the existing local citizen Auth user (\d227d384-f337-4912-8c3a-a26cde854daf\) with email \nanya.test@local.dev\ while preserving \public.profiles\ phone mapping (\+15550192834\).
+- **Mobile UX**: Added \CitizenLoginScreen.tsx\ rendering Email & Password inputs. Replaced \PhoneEntryScreen\ and \OtpVerifyScreen\ in \App.tsx\ navigation flow. Normal login directly calls \supabase.auth.signInWithPassword({ email, password })\. No OTP screen is displayed.
+- **Demo Mode Isolation**: The synthetic 'Try Demo' (\enterDemoMode\) path remains strictly isolated and independent.
+- **E2E Request Flow**: Tested full flow from institution request creation (\POST /functions/v1/institution_requests\) -> send dispatch (\POST /functions/v1/institution_request_send\) -> citizen email/password login -> \GET /functions/v1/requests\ retrieval. All checks passed with HTTP 200 and exact citizen ownership verification.
+
+
+## Mobile Metro & UI Refresh Verification
+- **Status**: VERIFIED & RUNNING
+- **Root Cause Identified**: Two stale Metro bundler instances (PID 22136 and PID 12256) were running in the background from the repository root on ports 8081 and 8082, serving cached bundles to connected mobile devices. Additionally, apps/mobile/.env had a stale IP (192.168.0.101) instead of the active machine IP (10.248.51.139).
+- **Remediation**: Terminated both stale Metro processes. Purged .expo caches from both root and apps/mobile. Updated apps/mobile/.env with the active local IP. Relaunched Metro bundler strictly from apps/mobile using \
+px expo start --tunnel -c\.
+- **Bundle Verification**: Queried the live Metro bundle at http://localhost:8081/apps/mobile/index.bundle; confirmed \CitizenLoginScreen\ is bundled with the 'LOCAL EMAIL LOGIN' badge, Email & Password inputs, and \signInWithPassword\ handler. \PhoneEntryScreen\ is absent from the bundle.
+- **Runtime Verification**: Tested \nanya.test@local.dev\ login and \GET /functions/v1/requests\ over 10.248.51.139. Successfully retrieved both pending requests with HTTP 200.
+
+
+## Institution Request Creation & Web Portal Fix
+- **Status**: VERIFIED & RESOLVED
+- **Root Cause Identified**: \pps/web/src/services/institutionService.ts\ was calling \\/institution/requests\ instead of the actual Edge Function \/institution_requests\, and \CreateRequestView.tsx\ was sending a hardcoded placeholder profile UUID (\ 0000000-0000-0000-0000-000000000001\) instead of the real database profile ID (\db1d65b9-c276-4123-aef8-25ed3c7e4fb5\). On 404/RPC rejection, the frontend silently fell back to client-side in-memory mock fixtures without persisting anything to the database.
+- **Remediation Applied**:
+  1. Fixed \institutionService.ts\ to call \/institution_requests\ and \/institution_request_send\ with proper payloads.
+  2. Updated \CreateRequestView.tsx\ to dynamically fetch \public.requirement_profiles\ and default to \db1d65b9-c276-4123-aef8-25ed3c7e4fb5\.
+  3. Set default citizen phone in \CreateRequestView.tsx\ to \+15550192834\ (Ananya's phone).
+  4. Re-launched Vite dev server on port 3000 and proxy on port 5173.
+  5. Re-launched Expo Metro bundler on port 8081 with tunnel.
+- **E2E Verification**: Executed live end-to-end dispatch: Institution creates request -> request successfully stored in `public.access_requests` with status `pending_user` -> Citizen queries `GET /requests` -> request retrieved with HTTP 200.
+
+## Institution Portal Create Account Screen Improvement
+- **Status**: IMPLEMENTED & VERIFIED
+- **Scope**: Re-designed and expanded the Institution Portal `Create Account` screen in `apps/web/src/components/InstitutionLoginView.tsx` and updated `apps/web/src/context/InstitutionAuthContext.tsx`.
+- **Form Structure Added**:
+  1. **Institution Details**:
+     - `Institution Name`: text input with placeholder `"e.g. National Education Loan Authority"`
+     - `Institution Type`: select dropdown with supported database types: `bank` ("Banking / Financial Institution"), `university` ("Higher Education / University"), `employer` ("Enterprise / Employer"), `government` ("Government / Regulatory Authority").
+  2. **Administrator Details**:
+     - `Administrator Full Name`: text input with placeholder `"Enter administrator name"`
+     - `Official Institution Email`: email input with placeholder `"admin@institution.org"`
+     - `Contact Number`: tel input with placeholder `"+91 XXXXX XXXXX"` and international format helper text.
+  3. **Account Security**:
+     - `Password`: password input (min 8 chars).
+     - `Confirm Password`: password input (match validation).
+- **Backend & Governance Integration**:
+  - `signUpWithEmail` updated in `InstitutionAuthContext.tsx` to pass `full_name`, `phone`, `institution_name`, and `institution_type` in `options.data` user metadata to Supabase Auth.
+  - Server-side governance preserved: trigger `handle_new_auth_user()` copies `full_name` to `public.profiles`. Institutional membership is NOT auto-promoted client-side and remains strictly protected by PostgreSQL RLS.
+  - Clean governance notice displayed on the form.
+- **Client-Side Validation**:
+  - Required field validations on all inputs.
+  - Format validation for email and international contact number (10-15 digits with country code).
+  - Password minimum length (>=8 chars) and confirm password match checks.
+  - Clear inline red error messages and highlighted border states.
+- **Visual Design & Layout**:
+  - Dynamic responsive container: compact `maxWidth: 460px` when in `login` mode, smoothly expands to `maxWidth: 700px` with a clean 2-column grid when in `register` mode.
+  - Restrained enterprise visual style matching LifePass brand: no neon, gradients, or glassmorphism.
+  - Existing Login view, "Try Demo Institution" action, and secondary demo notice preserved completely.
+- **Verification**:
+  - `npm run web:check` (`tsc --noEmit`) passed with 0 errors.
+  - `npm run web:build` (`tsc && vite build`) passed with 0 errors.
+  - `git diff --check apps/web` passed with 0 warnings/errors.
+  - Headless Chrome DevTools automated verification captured and validated:
+    - Default Login view (unchanged 460px card)
+    - Create Account view (expanded 700px 2-column layout)
+    - Client-side validation errors state (red borders + inline messages)
+    - Filled valid enterprise onboarding state
+    - Restored Login view on toggle back.
+

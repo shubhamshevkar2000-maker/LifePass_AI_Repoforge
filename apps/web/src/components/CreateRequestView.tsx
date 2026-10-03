@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import {
   createAndSendInstitutionRequest,
   InstitutionRequestItem,
@@ -16,10 +17,26 @@ export const CreateRequestView: React.FC<CreateRequestViewProps> = ({
   onNavigateToApplications,
 }) => {
   // Form fields
-  const [citizenPhone, setCitizenPhone] = useState('+14155552671');
-  const [selectedProfile, setSelectedProfile] = useState('00000000-0000-0000-0000-000000000001');
+  const [citizenPhone, setCitizenPhone] = useState('+15550192834');
+  const [profiles, setProfiles] = useState<{ id: string; name: string }[]>([
+    { id: 'db1d65b9-c276-4123-aef8-25ed3c7e4fb5', name: 'Education Loan Application' },
+    { id: '03d847f3-37ba-4d0f-9842-dfa4cb945a11', name: 'Employment Onboarding' },
+  ]);
+  const [selectedProfile, setSelectedProfile] = useState('db1d65b9-c276-4123-aef8-25ed3c7e4fb5');
   const [requestPurpose, setRequestPurpose] = useState('Education Loan Underwriting');
   const [expiryDays] = useState('30');
+
+  useEffect(() => {
+    supabase
+      .from('requirement_profiles')
+      .select('id, name')
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setProfiles(data);
+          setSelectedProfile(data[0].id);
+        }
+      });
+  }, []);
 
   // Multi-step / submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +70,7 @@ export const CreateRequestView: React.FC<CreateRequestViewProps> = ({
 
   const handleReset = () => {
     setCreatedRequest(null);
-    setCitizenPhone('+14155552671');
+    setCitizenPhone('+15550192834');
     setRequestPurpose('Education Loan Underwriting');
   };
 
@@ -189,15 +206,11 @@ export const CreateRequestView: React.FC<CreateRequestViewProps> = ({
                   value={selectedProfile}
                   onChange={(e) => setSelectedProfile(e.target.value)}
                 >
-                  <option value="00000000-0000-0000-0000-000000000001">
-                    Education Loan Application (Controlled Knowledge Base Profile)
-                  </option>
-                  <option value="masters_admission" disabled>
-                    Master’s Program Admission (Demo Placeholder — Unseeded in DB)
-                  </option>
-                  <option value="rental_lease" disabled>
-                    Rental Apartment Lease (Demo Placeholder — Unseeded in DB)
-                  </option>
+                  {profiles.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
                 </select>
                 <div style={styles.governanceNotice}>
                   <strong>Governance Policy:</strong> In accordance with <code>docs/DATABASE_SCHEMA.md</code> Section 4,

@@ -15,6 +15,7 @@ export interface AuthContextType {
   error: string | null;
   phoneEntered: string;
   setPhoneEntered: (phone: string) => void;
+  signInWithPassword: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   sendOtp: (phone: string) => Promise<{ success: boolean; error?: string }>;
   verifyOtp: (phone: string, token: string) => Promise<{ success: boolean; error?: string }>;
   updateProfileName: (fullName: string) => Promise<{ success: boolean; error?: string }>;
@@ -157,6 +158,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  // Email/Password sign in for local development
+  const signInWithPassword = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    setError(null);
+    if (!isSupabaseConfigured) {
+      const msg = 'Supabase environment is not configured.';
+      setError(msg);
+      return { success: false, error: msg };
+    }
+
+    try {
+      const { data, error: signInErr } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (signInErr) {
+        setError(signInErr.message);
+        return { success: false, error: signInErr.message };
+      }
+
+      if (data.session && data.user) {
+        setSession(data.session);
+        setUser(data.user);
+        await fetchProfile(data.user.id);
+        return { success: true };
+      }
+
+      return { success: false, error: 'Authentication could not be established.' };
+    } catch (err: any) {
+      const msg = err?.message || 'Login failed';
+      setError(msg);
+      return { success: false, error: msg };
+    }
+  };
+
   // Request Phone Number OTP through Supabase Auth
   const sendOtp = async (phone: string): Promise<{ success: boolean; error?: string }> => {
     setError(null);
@@ -283,6 +319,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error,
         phoneEntered,
         setPhoneEntered,
+        signInWithPassword,
         sendOtp,
         verifyOtp,
         updateProfileName,

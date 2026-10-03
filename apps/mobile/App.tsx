@@ -11,8 +11,7 @@ import {
 } from '@lifepass/shared';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { LandingScreen } from './src/screens/LandingScreen';
-import { PhoneEntryScreen } from './src/screens/PhoneEntryScreen';
-import { OtpVerifyScreen } from './src/screens/OtpVerifyScreen';
+import { CitizenLoginScreen } from './src/screens/CitizenLoginScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { MyRecordsScreen } from './src/screens/MyRecordsScreen';
 import { UploadRecordScreen } from './src/screens/UploadRecordScreen';
@@ -51,7 +50,7 @@ type AuthenticatedView =
 
 const MainNavigator: React.FC = () => {
   const { session, isLoading, isDemoMode, enterDemoMode, exitDemoMode } = useAuth();
-  const [currentStep, setCurrentStep] = useState<'landing' | 'phone' | 'otp'>('landing');
+  const [currentStep, setCurrentStep] = useState<'landing' | 'login'>('landing');
   const [currentView, setCurrentView] = useState<AuthenticatedView>('home');
   const [selectedCategory, setSelectedCategory] = useState<RecordCategory | undefined>(undefined);
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
@@ -360,24 +359,21 @@ const MainNavigator: React.FC = () => {
     );
   }
 
-  // Unauthenticated: Landing, Phone Entry or OTP Verification
+  // Unauthenticated: Landing or Citizen Login
   return (
     <View style={styles.appContainer}>
       <StatusBar style="dark" />
       {currentStep === 'landing' ? (
         <LandingScreen
           onTryDemo={enterDemoMode}
-          onLogin={() => setCurrentStep('phone')}
-          onSignUp={() => setCurrentStep('phone')}
+          onLogin={() => setCurrentStep('login')}
+          onSignUp={() => setCurrentStep('login')}
         />
-      ) : currentStep === 'phone' ? (
-        <PhoneEntryScreen
-          onOtpSent={() => setCurrentStep('otp')}
+      ) : (
+        <CitizenLoginScreen
           onBackToLanding={() => setCurrentStep('landing')}
           onTryDemo={enterDemoMode}
         />
-      ) : (
-        <OtpVerifyScreen onBackToPhone={() => setCurrentStep('phone')} />
       )}
     </View>
   );

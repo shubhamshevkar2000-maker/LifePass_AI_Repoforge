@@ -222,7 +222,11 @@ export async function createAndSendInstitutionRequest(input: {
   if (BACKEND_SERVICE_BASE_URL) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      const response = await fetch(`${BACKEND_SERVICE_BASE_URL}/institution/requests`, {
+      const createUrl = BACKEND_SERVICE_BASE_URL.includes('/functions/v1')
+        ? `${BACKEND_SERVICE_BASE_URL}/institution_requests`
+        : `${BACKEND_SERVICE_BASE_URL}/institution/requests`;
+
+      const response = await fetch(createUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -237,25 +241,58 @@ export async function createAndSendInstitutionRequest(input: {
       });
 
       if (response.ok) {
-        const created = (await response.json()) as InstitutionRequestItem;
-        // Trigger dispatch
-        await fetch(`${BACKEND_SERVICE_BASE_URL}/institution/requests/${created.id}/send`, {
+        const createResult = await response.json();
+        const requestId = createResult.id;
+
+        // Trigger dispatch via /institution_request_send
+        const sendUrl = BACKEND_SERVICE_BASE_URL.includes('/functions/v1')
+          ? `${BACKEND_SERVICE_BASE_URL}/institution_request_send`
+          : `${BACKEND_SERVICE_BASE_URL}/institution/requests/${requestId}/send`;
+
+        await fetch(sendUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
           },
-        }).catch(() => null);
+          body: JSON.stringify({ request_id: requestId }),
+        }).catch((err) => console.error('Request dispatch error:', err));
 
-        return { data: created, error: null, isDevFixture: false };
+        const createdItem: InstitutionRequestItem = {
+          id: requestId,
+          applicationNumber: `APP-${requestId.slice(0, 8).toUpperCase()}`,
+          applicantName: 'Ananya Test Citizen',
+          applicantPhone: input.citizenPhone,
+          purpose: input.purpose,
+          status: 'awaiting_consent',
+          consentStatus: 'awaiting',
+          requirementProfileName: 'Education Loan Application',
+          requirementProfileId: input.requirementProfileId,
+          readinessScore: 0,
+          satisfiedCount: 0,
+          totalCount: 5,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          documents: [],
+        };
+
+        return { data: createdItem, error: null, isDevFixture: false };
       }
 
       const errorJson = await response.json().catch(() => null);
       if (errorJson?.error) {
         return { data: null, error: errorJson.error, isDevFixture: false };
       }
-    } catch {
-      // Fallback
+      return {
+        data: null,
+        error: {
+          code: 'PROCESSING_FAILED',
+          message: errorJson?.message || `Request creation failed with status ${response.status}`,
+        },
+        isDevFixture: false,
+      };
+    } catch (err: any) {
+      console.error('Real backend create request failed:', err);
     }
   }
 

@@ -53,6 +53,54 @@ Starts document processing.
 ### DELETE /records/{id}
 Archives/removes the user's record according to retention policy.
 
+### GET /requests
+Purpose:
+Return access requests addressed to the authenticated citizen.
+
+- Authentication: Supabase Auth JWT required.
+- Authorization: Enforced securely via PostgreSQL RLS `user_id = auth.uid()`.
+- Ownership isolation: Returns only requests assigned to the authenticated user.
+- Response shape:
+```json
+{
+  "requests": [
+    {
+      "id": "uuid",
+      "institution_id": "uuid",
+      "institution_name": "string",
+      "purpose": "string",
+      "status": "string",
+      "raw_status": "string",
+      "requirement_profile_id": "uuid",
+      "requirement_profile_name": "string",
+      "requested_requirements": [],
+      "selected_records": [],
+      "created_at": "timestamp",
+      "expires_at": "timestamp"
+    }
+  ]
+}
+```
+
+### GET /requests/{id}
+Purpose:
+Return one access request only when it belongs to the authenticated citizen.
+
+- Authentication: Supabase Auth JWT required.
+- Authorization: Enforced securely via PostgreSQL RLS `user_id = auth.uid()`.
+- Ownership isolation: If a citizen requests another citizen's ID, returns `NOT_FOUND` (404).
+- Response shape:
+```json
+{
+  "request": {
+    "id": "uuid",
+    "institution_id": "uuid",
+    "institution_name": "string",
+    ...
+  }
+}
+```
+
 ## 4. AI endpoints
 
 ### POST /ai/intent

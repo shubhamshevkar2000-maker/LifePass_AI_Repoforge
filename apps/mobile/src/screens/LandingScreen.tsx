@@ -96,7 +96,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
               style={styles.secondaryBtn}
               onPress={onLogin}
               activeOpacity={0.7}
-              accessibilityLabel="Login with Phone"
+              accessibilityLabel="Login with Email"
             >
               <Text style={styles.secondaryBtnText}>Login</Text>
             </TouchableOpacity>

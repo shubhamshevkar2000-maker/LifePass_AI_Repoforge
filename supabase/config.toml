@@ -21,6 +21,18 @@ jwt_expiry = 3600
 enable_signup = true
 double_confirm_changes = true
 
+[auth.sms.test_otp]
+"+15550192834" = "123456"
+"+15550192835" = "123456"
+"+12345678901" = "123456"
+"+14155552671" = "123456"
+
+[auth.sms.twilio]
+enabled = true
+account_sid = "AC00000000000000000000000000000000"
+message_service_sid = "MG00000000000000000000000000000000"
+auth_token = "00000000000000000000000000000000"
+
 [storage]
 enabled = true
 file_size_limit = "50MiB"
