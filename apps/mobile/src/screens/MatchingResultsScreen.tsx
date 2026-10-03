@@ -38,6 +38,7 @@ import {
 } from '@lifepass/shared';
 import { evaluateRecordMatching } from '../services/matchingService';
 import { StatusBadge } from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 
 interface MatchingResultsScreenProps {
   requirementProfile: RequirementProfile;
@@ -58,6 +59,7 @@ export const MatchingResultsScreen: React.FC<MatchingResultsScreenProps> = ({
   onBackToRequirements,
   onBackToHome,
 }) => {
+  const { isDemoMode } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [evaluationData, setEvaluationData] = useState<MatchingEvaluateResponse | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
@@ -67,7 +69,7 @@ export const MatchingResultsScreen: React.FC<MatchingResultsScreenProps> = ({
     setIsLoading(true);
     setError(null);
 
-    const result = await evaluateRecordMatching(requirementProfile.profile_id);
+    const result = await evaluateRecordMatching(requirementProfile.profile_id, isDemoMode);
     setIsLoading(false);
     setIsFixtureUsed(result.isDevFixture);
 
@@ -82,7 +84,7 @@ export const MatchingResultsScreen: React.FC<MatchingResultsScreenProps> = ({
     }
 
     setEvaluationData(result.data);
-  }, [requirementProfile.profile_id]);
+  }, [requirementProfile.profile_id, isDemoMode]);
 
   useEffect(() => {
     loadEvaluation();
@@ -179,11 +181,10 @@ export const MatchingResultsScreen: React.FC<MatchingResultsScreenProps> = ({
         </View>
 
         {/* Development Fixture Notice */}
-        {isFixtureUsed && (
+        {!isDemoMode && isFixtureUsed && (
           <View style={styles.fixtureNotice}>
             <Text style={styles.fixtureNoticeText}>
-              DEVELOPMENT FIXTURE ACTIVE: Live /matching/evaluate endpoint not yet deployed.
-              Displaying simulated matching results for UI verification.
+              OFFLINE MODE: Displaying local simulated matching results for UI verification.
             </Text>
           </View>
         )}

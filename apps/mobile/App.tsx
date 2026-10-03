@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import {
   RecordCategory,
@@ -10,6 +10,7 @@ import {
   AttentionNeededRequirementItem,
 } from '@lifepass/shared';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { LandingScreen } from './src/screens/LandingScreen';
 import { PhoneEntryScreen } from './src/screens/PhoneEntryScreen';
 import { OtpVerifyScreen } from './src/screens/OtpVerifyScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
@@ -49,8 +50,8 @@ type AuthenticatedView =
   | 'notifications';
 
 const MainNavigator: React.FC = () => {
-  const { session, isLoading } = useAuth();
-  const [currentStep, setCurrentStep] = useState<'phone' | 'otp'>('phone');
+  const { session, isLoading, isDemoMode, enterDemoMode, exitDemoMode } = useAuth();
+  const [currentStep, setCurrentStep] = useState<'landing' | 'phone' | 'otp'>('landing');
   const [currentView, setCurrentView] = useState<AuthenticatedView>('home');
   const [selectedCategory, setSelectedCategory] = useState<RecordCategory | undefined>(undefined);
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
@@ -58,6 +59,7 @@ const MainNavigator: React.FC = () => {
   // Phase 3 AI Intent & Requirement Knowledge state
   const [intentResult, setIntentResult] = useState<AiIntentResponse | null>(null);
   const [originalGoal, setOriginalGoal] = useState<string>('');
+  const [aiGoalPrompt, setAiGoalPrompt] = useState<string>('I want to apply for an education loan');
   const [requirementProfile, setRequirementProfile] = useState<RequirementProfile | null>(null);
 
   // Review & Sharing + Consent state
@@ -133,6 +135,24 @@ const MainNavigator: React.FC = () => {
     return (
       <View style={styles.appContainer}>
         <StatusBar style="dark" />
+        {isDemoMode && (
+          <View style={styles.demoBanner}>
+            <View style={styles.demoBadge}>
+              <Text style={styles.demoBadgeText}>DEMO MODE</Text>
+            </View>
+            <Text style={styles.demoBannerText}>
+              Synthetic Citizen Records • No real documents
+            </Text>
+            <TouchableOpacity
+              onPress={exitDemoMode}
+              style={styles.demoExitBtn}
+              activeOpacity={0.7}
+              accessibilityLabel="Exit Demo"
+            >
+              <Text style={styles.demoExitBtnText}>Exit</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.screenContainer}>
           {currentView === 'home' && (
             <HomeScreen
@@ -142,12 +162,19 @@ const MainNavigator: React.FC = () => {
               }}
               onNavigateToUpload={() => setCurrentView('upload')}
               onNavigateToProfile={() => setCurrentView('profile')}
-              onNavigateToAiTask={() => setCurrentView('ai_task_entry')}
+              onNavigateToAiTask={(goal) => {
+                if (goal) setAiGoalPrompt(goal);
+                setCurrentView('ai_task_entry');
+              }}
               onNavigateToReviewShare={() => {
                 if (requirementProfile) {
                   setCurrentView('matching_results');
                 } else {
-                  setCurrentView('ai_task_entry');
+                  setRequirementProfile(EDUCATION_LOAN_REQUIREMENT_PROFILE_FIXTURE);
+                  setMatchedForSharing(EDUCATION_LOAN_MATCHING_FIXTURE.matched);
+                  setMissingForSharing(EDUCATION_LOAN_MATCHING_FIXTURE.missing);
+                  setAttentionForSharing(EDUCATION_LOAN_MATCHING_FIXTURE.attention_needed);
+                  setCurrentView('matching_results');
                 }
               }}
               onNavigateToNotifications={() => setCurrentView('notifications')}
@@ -199,6 +226,7 @@ const MainNavigator: React.FC = () => {
 
           {currentView === 'ai_task_entry' && (
             <AiTaskEntryScreen
+              initialGoal={aiGoalPrompt}
               onTaskInterpreted={(result, goal) => {
                 setIntentResult(result);
                 setOriginalGoal(goal);
@@ -279,7 +307,7 @@ const MainNavigator: React.FC = () => {
                 // Consent completed callback
               }}
               onBackToReview={() => setCurrentView('review_share')}
-              onReturnToHome={() => setCurrentView('requests')}
+              onReturnToHome={() => setCurrentView('home')}
             />
           )}
 
@@ -332,12 +360,22 @@ const MainNavigator: React.FC = () => {
     );
   }
 
-  // Unauthenticated: Phone Entry or OTP Verification (Preserved from Phase 1)
+  // Unauthenticated: Landing, Phone Entry or OTP Verification
   return (
     <View style={styles.appContainer}>
       <StatusBar style="dark" />
-      {currentStep === 'phone' ? (
-        <PhoneEntryScreen onOtpSent={() => setCurrentStep('otp')} />
+      {currentStep === 'landing' ? (
+        <LandingScreen
+          onTryDemo={enterDemoMode}
+          onLogin={() => setCurrentStep('phone')}
+          onSignUp={() => setCurrentStep('phone')}
+        />
+      ) : currentStep === 'phone' ? (
+        <PhoneEntryScreen
+          onOtpSent={() => setCurrentStep('otp')}
+          onBackToLanding={() => setCurrentStep('landing')}
+          onTryDemo={enterDemoMode}
+        />
       ) : (
         <OtpVerifyScreen onBackToPhone={() => setCurrentStep('phone')} />
       )}
@@ -372,5 +410,48 @@ const styles = StyleSheet.create({
     marginTop: 16,
     color: '#64748B',
     fontSize: 13,
+  },
+  demoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FEF3C7',
+    borderBottomWidth: 1,
+    borderBottomColor: '#FDE68A',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  demoBadge: {
+    backgroundColor: '#F59E0B',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 6,
+  },
+  demoBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  demoBannerText: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#92400E',
+  },
+  demoExitBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: 4,
+    marginLeft: 6,
+  },
+  demoExitBtnText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
   },
 });

@@ -12,6 +12,7 @@ import {
 import { RecordCategory, RecordItem } from '@lifepass/shared';
 import { listRecords } from '../services/recordService';
 import { StatusBadge } from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 
 interface MyRecordsScreenProps {
   initialCategory?: RecordCategory;
@@ -35,6 +36,7 @@ export const MyRecordsScreen: React.FC<MyRecordsScreenProps> = ({
   onNavigateToUpload,
   onBackToHome,
 }) => {
+  const { isDemoMode } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<RecordCategory | 'all'>(
     initialCategory || 'all'
   );
@@ -49,7 +51,7 @@ export const MyRecordsScreen: React.FC<MyRecordsScreenProps> = ({
     setErrorMessage(null);
 
     const catFilter = selectedCategory === 'all' ? undefined : selectedCategory;
-    const res = await listRecords(catFilter);
+    const res = await listRecords(catFilter, isDemoMode);
 
     setIsLoading(false);
     setIsRefreshing(false);
@@ -66,7 +68,7 @@ export const MyRecordsScreen: React.FC<MyRecordsScreenProps> = ({
     if (res.isBackendAvailable !== undefined) {
       setIsBackendAvailable(res.isBackendAvailable);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, isDemoMode]);
 
   useEffect(() => {
     fetchRecords();
@@ -116,14 +118,13 @@ export const MyRecordsScreen: React.FC<MyRecordsScreenProps> = ({
       </View>
 
       {/* Backend Status Notice */}
-      {!isBackendAvailable && (
+      {!isBackendAvailable && !isDemoMode && (
         <View style={styles.backendNoticeBox}>
           <Text style={styles.backendNoticeTitle}>
-            PHASE 2 BACKEND GATE PENDING (WORKSTREAM 1)
+            OFFLINE / DEV MODE ACTIVE
           </Text>
           <Text style={styles.backendNoticeText}>
-            The PostgreSQL table `public.records` is not yet provisioned in this environment.
-            Displaying development fixtures for UI verification.
+            Backend database is unreachable. Displaying local records for UI verification.
           </Text>
         </View>
       )}

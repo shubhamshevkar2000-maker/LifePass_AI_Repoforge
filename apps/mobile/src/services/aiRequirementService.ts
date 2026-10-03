@@ -39,7 +39,8 @@ const AI_SERVICE_BASE_URL = process.env.EXPO_PUBLIC_AI_SERVICE_URL || null;
  * Request: { "message": "I want to apply for an education loan." }
  */
 export async function interpretTaskIntent(
-  message: string
+  message: string,
+  isDemoMode?: boolean
 ): Promise<ServiceResult<AiIntentResponse>> {
   const trimmed = message?.trim();
   if (!trimmed) {
@@ -53,22 +54,22 @@ export async function interpretTaskIntent(
     };
   }
 
-  // 1. Try real backend endpoint if configured
-  if (true) {
+  // 1. Try real backend endpoint if not in demo mode
+  if (!isDemoMode) {
     try {
-      const session = (await supabase.auth.getSession()).data.session;
-      const { data, error } = await supabase.functions.invoke('ai_intent', {
+      const invokePromise = supabase.functions.invoke('ai_intent', {
         body: { message: trimmed }
       });
-      if (error) {
-         return { data: null, error: { code: 'PROCESSING_FAILED', message: error.message }, isDevFixture: false };
-      }
-      return { data, error: null, isDevFixture: false };
-    } catch {
-      // Backend request failed; fall through to development fixture
-      console.warn(
-        '[LifePass AI Service] Live /ai/intent unreachable. Falling back to development fixture.'
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('AI service timeout')), 2000)
       );
+
+      const { data, error } = (await Promise.race([invokePromise, timeoutPromise])) as any;
+      if (!error && data) {
+        return { data, error: null, isDevFixture: false };
+      }
+    } catch {
+      // Backend request failed or timed out; fall through to development fixture
     }
   }
 
@@ -88,7 +89,7 @@ export async function interpretTaskIntent(
         ? apiError
         : {
             code: 'AI_UNAVAILABLE',
-            message: 'Unable to analyze goal intent.',
+            message: 'Unable to analyze goal intent. Please try again.',
           },
       isDevFixture: true,
     };
@@ -101,7 +102,8 @@ export async function interpretTaskIntent(
  * Request: { "task": "education_loan" }
  */
 export async function fetchRequirementProfile(
-  task: string
+  task: string,
+  isDemoMode?: boolean
 ): Promise<ServiceResult<RequirementProfile>> {
   const trimmed = task?.trim();
   if (!trimmed) {
@@ -115,10 +117,9 @@ export async function fetchRequirementProfile(
     };
   }
 
-  // 1. Try real backend endpoint if configured
-  if (true) {
+  // 1. Try real backend endpoint if not in demo mode
+  if (!isDemoMode) {
     try {
-      const session = (await supabase.auth.getSession()).data.session;
       const { data: profile, error: profileErr } = await supabase
         .from('requirement_profiles')
         .select('id, name, domain, task_code, version, description, status')
@@ -126,35 +127,29 @@ export async function fetchRequirementProfile(
         .eq('status', 'active')
         .single();
 
-      if (profileErr || !profile) {
-        return { data: null, error: { code: 'REQUIREMENT_PROFILE_NOT_FOUND', message: 'Profile not found.' }, isDevFixture: false };
+      if (!profileErr && profile) {
+        const { data: reqs, error: reqsErr } = await supabase
+          .from('requirements')
+          .select('*')
+          .eq('profile_id', profile.id);
+
+        if (!reqsErr && reqs) {
+          const requirementProfile: RequirementProfile = {
+            profile_id: profile.id,
+            name: profile.name,
+            domain: profile.domain,
+            task_code: profile.task_code,
+            version: profile.version,
+            description: profile.description,
+            status: profile.status,
+            requirements: reqs
+          };
+
+          return { data: requirementProfile, error: null, isDevFixture: false };
+        }
       }
-
-      const { data: reqs, error: reqsErr } = await supabase
-        .from('requirements')
-        .select('*')
-        .eq('profile_id', profile.id);
-
-      if (reqsErr) {
-        return { data: null, error: { code: 'PROCESSING_FAILED', message: reqsErr.message }, isDevFixture: false };
-      }
-
-      const requirementProfile: RequirementProfile = {
-        profile_id: profile.id,
-        name: profile.name,
-        domain: profile.domain,
-        task_code: profile.task_code,
-        version: profile.version,
-        description: profile.description,
-        status: profile.status,
-        requirements: reqs
-      };
-
-      return { data: requirementProfile, error: null, isDevFixture: false };
     } catch {
-      console.warn(
-        '[LifePass AI Service] Live /ai/requirements unreachable. Falling back to development fixture.'
-      );
+      // Fall through to fixture
     }
   }
 

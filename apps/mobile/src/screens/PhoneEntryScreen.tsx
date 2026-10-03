@@ -14,9 +14,15 @@ import { useAuth } from '../context/AuthContext';
 
 interface PhoneEntryScreenProps {
   onOtpSent: () => void;
+  onBackToLanding?: () => void;
+  onTryDemo?: () => void;
 }
 
-export const PhoneEntryScreen: React.FC<PhoneEntryScreenProps> = ({ onOtpSent }) => {
+export const PhoneEntryScreen: React.FC<PhoneEntryScreenProps> = ({
+  onOtpSent,
+  onBackToLanding,
+  onTryDemo,
+}) => {
   const { sendOtp, error, clearError, isConfigured } = useAuth();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +54,12 @@ export const PhoneEntryScreen: React.FC<PhoneEntryScreenProps> = ({ onOtpSent })
     >
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
+          {onBackToLanding && (
+            <TouchableOpacity onPress={onBackToLanding} style={styles.backButton} activeOpacity={0.7}>
+              <Text style={styles.backButtonText}>← Back to Welcome</Text>
+            </TouchableOpacity>
+          )}
+
           <View style={styles.header}>
             <Text style={styles.title}>LifePass AI</Text>
             <Text style={styles.subtitle}>Unified Life-Stage Digital Identity</Text>
@@ -108,6 +120,16 @@ export const PhoneEntryScreen: React.FC<PhoneEntryScreenProps> = ({ onOtpSent })
               <Text style={styles.buttonText}>Send Verification Code</Text>
             )}
           </TouchableOpacity>
+
+          {onTryDemo && (
+            <TouchableOpacity
+              style={styles.demoShortcutBtn}
+              onPress={onTryDemo}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.demoShortcutBtnText}>Switch to Demo Mode (No OTP) →</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>
@@ -264,5 +286,33 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 16,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    backgroundColor: '#F1F5F9',
+    marginBottom: 12,
+  },
+  backButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  demoShortcutBtn: {
+    marginTop: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    alignItems: 'center',
+  },
+  demoShortcutBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0284C7',
   },
 });

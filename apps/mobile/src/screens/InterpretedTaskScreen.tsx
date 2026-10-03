@@ -31,6 +31,7 @@ import {
   ApiError,
 } from '@lifepass/shared';
 import { fetchRequirementProfile } from '../services/aiRequirementService';
+import { useAuth } from '../context/AuthContext';
 
 interface InterpretedTaskScreenProps {
   intentResult: AiIntentResponse;
@@ -47,6 +48,7 @@ export const InterpretedTaskScreen: React.FC<InterpretedTaskScreenProps> = ({
   onEditGoal,
   onBackToHome,
 }) => {
+  const { isDemoMode } = useAuth();
   const [isLoadingRequirements, setIsLoadingRequirements] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
 
@@ -61,7 +63,7 @@ export const InterpretedTaskScreen: React.FC<InterpretedTaskScreenProps> = ({
     setIsLoadingRequirements(true);
     setError(null);
 
-    const result = await fetchRequirementProfile(intentResult.task);
+    const result = await fetchRequirementProfile(intentResult.task, isDemoMode);
     setIsLoadingRequirements(false);
 
     if (result.error || !result.data) {

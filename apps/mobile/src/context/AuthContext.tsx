@@ -9,6 +9,9 @@ export interface AuthContextType {
   profile: Profile | null;
   isLoading: boolean;
   isConfigured: boolean;
+  isDemoMode: boolean;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
   error: string | null;
   phoneEntered: string;
   setPhoneEntered: (phone: string) => void;
@@ -19,15 +22,61 @@ export interface AuthContextType {
   clearError: () => void;
 }
 
+export const DEMO_USER: User = {
+  id: 'dev-citizen-user',
+  app_metadata: { provider: 'demo' },
+  user_metadata: { full_name: 'Ananya Sharma (Demo Citizen)' },
+  aud: 'authenticated',
+  created_at: '2026-09-15T10:00:00Z',
+  email: 'ananya.demo@lifepass.internal',
+  phone: '+1 (555) 019-2834',
+  role: 'citizen',
+  updated_at: '2026-09-15T10:00:00Z',
+} as unknown as User;
+
+export const DEMO_SESSION: Session = {
+  access_token: 'demo-access-token',
+  refresh_token: 'demo-refresh-token',
+  expires_in: 3600,
+  token_type: 'bearer',
+  user: DEMO_USER,
+};
+
+export const DEMO_PROFILE: Profile = {
+  id: 'dev-citizen-user',
+  full_name: 'Ananya Sharma (Demo Citizen)',
+  phone: '+1 (555) 019-2834',
+  avatar_url: null,
+  created_at: '2026-09-15T10:00:00Z',
+  updated_at: '2026-09-15T10:00:00Z',
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [phoneEntered, setPhoneEntered] = useState<string>('');
+
+  const enterDemoMode = () => {
+    setIsDemoMode(true);
+    setUser(DEMO_USER);
+    setSession(DEMO_SESSION);
+    setProfile(DEMO_PROFILE);
+    setError(null);
+  };
+
+  const exitDemoMode = () => {
+    setIsDemoMode(false);
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setError(null);
+  };
 
   // Fetch application profile from public.profiles
   const fetchProfile = async (userId: string) => {
@@ -202,9 +251,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Sign out and clear session
   const signOut = async () => {
+    if (isDemoMode) {
+      exitDemoMode();
+      return;
+    }
     try {
       await supabase.auth.signOut();
     } finally {
+      setIsDemoMode(false);
       setUser(null);
       setSession(null);
       setProfile(null);
@@ -223,6 +277,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         isLoading,
         isConfigured: isSupabaseConfigured,
+        isDemoMode,
+        enterDemoMode,
+        exitDemoMode,
         error,
         phoneEntered,
         setPhoneEntered,

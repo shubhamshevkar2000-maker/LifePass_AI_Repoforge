@@ -40,7 +40,8 @@ const BACKEND_SERVICE_BASE_URL =
  * Fetch access request details for citizen review
  */
 export async function fetchAccessRequest(
-  requestId: string
+  requestId: string,
+  isDemoMode?: boolean
 ): Promise<ConsentServiceResult<AccessRequestContext>> {
   const trimmedId = requestId?.trim();
   if (!trimmedId) {
@@ -54,16 +55,21 @@ export async function fetchAccessRequest(
     };
   }
 
-  // 1. Try real backend endpoint if configured
-  if (true) {
+  // 1. Try real backend endpoint if configured and not demo mode
+  if (!isDemoMode && BACKEND_SERVICE_BASE_URL) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      const response = await fetch(`${BACKEND_SERVICE_BASE_URL}/requests/${trimmedId}`, {
+      const fetchPromise = fetch(`${BACKEND_SERVICE_BASE_URL}/requests/${trimmedId}`, {
         headers: {
           'Content-Type': 'application/json',
           ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Network request timed out')), 2000)
+      );
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (response.ok) {
         const data = (await response.json()) as AccessRequestContext;
@@ -111,7 +117,8 @@ export async function fetchAccessRequest(
  */
 export async function submitConsent(
   requestId: string,
-  payload: ConsentRequestPayload
+  payload: ConsentRequestPayload,
+  isDemoMode?: boolean
 ): Promise<ConsentServiceResult<ConsentUiResult>> {
   const trimmedId = requestId?.trim();
   if (!trimmedId) {
@@ -125,13 +132,17 @@ export async function submitConsent(
     };
   }
 
-  // 1. Try real backend endpoint if configured
-  if (true) {
+  // 1. Try real backend endpoint if configured and not demo mode
+  if (!isDemoMode) {
     try {
-      const session = (await supabase.auth.getSession()).data.session;
-      const { data, error } = await supabase.functions.invoke('consent_decision', {
+      const invokePromise = supabase.functions.invoke('consent_decision', {
         body: { request_id: trimmedId, decision: payload.decision, selected_record_ids: payload.selected_record_ids }
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Network request timed out')), 2000)
+      );
+
+      const { data, error } = (await Promise.race([invokePromise, timeoutPromise])) as any;
       if (error) {
          return { data: null, error: { code: 'PROCESSING_FAILED', message: error.message }, isDevFixture: false };
       }

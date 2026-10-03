@@ -35,7 +35,8 @@ const BACKEND_SERVICE_BASE_URL =
  * Contract: POST /matching/evaluate
  */
 export async function evaluateRecordMatching(
-  requirementProfileId: string
+  requirementProfileId: string,
+  isDemoMode?: boolean
 ): Promise<MatchingServiceResult> {
   const trimmedProfileId = requirementProfileId?.trim();
   if (!trimmedProfileId) {
@@ -49,68 +50,59 @@ export async function evaluateRecordMatching(
     };
   }
 
-  // 1. Attempt real backend endpoint if configured
-  if (true) {
+  // 1. Attempt real backend endpoint if configured and not in demo mode
+  if (!isDemoMode) {
     try {
       const session = (await supabase.auth.getSession()).data.session;
       const userId = session?.user?.id;
 
-      if (!userId) {
-        return {
-          data: null,
-          error: {
-            code: 'UNAUTHENTICATED',
-            message: 'You must be authenticated to evaluate record readiness.',
-          },
-          isDevFixture: false,
+      if (userId) {
+        const payload: MatchingEvaluateRequest = {
+          user_id: userId,
+          requirement_profile_id: trimmedProfileId,
         };
+
+        const invokePromise = supabase.functions.invoke('matching_evaluate', {
+          body: payload
+        });
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Matching service timeout')), 2000)
+        );
+
+        const { data: edgeData, error: edgeError } = (await Promise.race([invokePromise, timeoutPromise])) as any;
+
+        if (!edgeError && edgeData) {
+          // Adapter for nested backend structure to flat UI structure
+          const adaptMatched = (item: any) => ({
+            requirement_id: item.requirement?.id,
+            requirement_name: item.requirement?.name,
+            requirement_code: item.requirement?.code,
+            record_id: item.record?.id,
+            record_title: item.record?.title,
+            processing_status: item.record?.status,
+            external_verification_status: item.record?.external_verification_status
+          });
+
+          const adaptMissing = (item: any) => ({
+            requirement_id: item.requirement?.id,
+            requirement_name: item.requirement?.name,
+            requirement_code: item.requirement?.code,
+            category: item.requirement?.category,
+            reason: item.reason
+          });
+
+          const adaptedData: MatchingEvaluateResponse = {
+            readiness_percent: edgeData.readiness_percent,
+            matched: (edgeData.matched || []).map(adaptMatched),
+            missing: (edgeData.missing || []).map(adaptMissing),
+            attention_needed: edgeData.attention_needed || []
+          };
+
+          return { data: adaptedData, error: null, isDevFixture: false };
+        }
       }
-
-      const payload: MatchingEvaluateRequest = {
-        user_id: userId,
-        requirement_profile_id: trimmedProfileId,
-      };
-
-      // Call Supabase Edge Function 'matching_evaluate'
-      const { data: edgeData, error: edgeError } = await supabase.functions.invoke('matching_evaluate', {
-        body: payload
-      });
-
-      if (edgeError) {
-        return { data: null, error: { code: 'PROCESSING_FAILED', message: edgeError.message }, isDevFixture: false };
-      }
-
-      // Adapter for nested backend structure to flat UI structure
-      const adaptMatched = (item: any) => ({
-        requirement_id: item.requirement?.id,
-        requirement_name: item.requirement?.name,
-        requirement_code: item.requirement?.code,
-        record_id: item.record?.id,
-        record_title: item.record?.title,
-        processing_status: item.record?.status,
-        external_verification_status: item.record?.external_verification_status
-      });
-
-      const adaptMissing = (item: any) => ({
-        requirement_id: item.requirement?.id,
-        requirement_name: item.requirement?.name,
-        requirement_code: item.requirement?.code,
-        category: item.requirement?.category,
-        reason: item.reason
-      });
-
-      const adaptedData: MatchingEvaluateResponse = {
-        readiness_percent: edgeData.readiness_percent,
-        matched: (edgeData.matched || []).map(adaptMatched),
-        missing: (edgeData.missing || []).map(adaptMissing),
-        attention_needed: edgeData.attention_needed || []
-      };
-
-      return { data: adaptedData, error: null, isDevFixture: false };
     } catch {
-      console.warn(
-        '[LifePass Matching Service] Live /matching/evaluate unreachable. Falling back to development fixture.'
-      );
+      // Fall through to development fixture
     }
   }
 
@@ -130,7 +122,7 @@ export async function evaluateRecordMatching(
         ? apiError
         : {
             code: 'PROCESSING_FAILED',
-            message: 'Unable to evaluate record readiness.',
+            message: 'Unable to evaluate record readiness. Please try again.',
           },
       isDevFixture: true,
     };

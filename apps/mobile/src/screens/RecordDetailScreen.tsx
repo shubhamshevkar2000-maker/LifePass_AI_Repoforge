@@ -13,6 +13,7 @@ import {
 import { RecordItem } from '@lifepass/shared';
 import { getRecord, getSignedDocumentUrl, deleteRecord } from '../services/recordService';
 import { StatusBadge } from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 
 interface RecordDetailScreenProps {
   recordId: string;
@@ -25,6 +26,7 @@ export const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({
   onBackToRecords,
   onRecordDeleted,
 }) => {
+  const { isDemoMode } = useAuth();
   const [record, setRecord] = useState<RecordItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export const RecordDetailScreen: React.FC<RecordDetailScreenProps> = ({
       setIsLoading(true);
       setErrorMessage(null);
 
-      const res = await getRecord(recordId);
+      const res = await getRecord(recordId, isDemoMode);
 
       if (mounted) {
         setIsLoading(false);

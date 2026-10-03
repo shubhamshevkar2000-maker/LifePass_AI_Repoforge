@@ -41,6 +41,7 @@ import {
   submitConsent,
   ConsentUiResult,
 } from '../services/consentService';
+import { useAuth } from '../context/AuthContext';
 
 interface ConsentScreenProps {
   requestId?: string;
@@ -61,6 +62,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
   onBackToReview,
   onReturnToHome,
 }) => {
+  const { isDemoMode } = useAuth();
   const [isLoadingContext, setIsLoadingContext] = useState(true);
   const [requestContext, setRequestContext] = useState<AccessRequestContext | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,7 +79,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
     setIsLoadingContext(true);
     setError(null);
 
-    const result = await fetchAccessRequest(requestId);
+    const result = await fetchAccessRequest(requestId, isDemoMode);
     setIsLoadingContext(false);
     setIsFixtureUsed(result.isDevFixture);
 
@@ -92,7 +94,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
     }
 
     setRequestContext(result.data);
-  }, [requestId]);
+  }, [requestId, isDemoMode]);
 
   useEffect(() => {
     loadContext();
@@ -107,7 +109,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
       selected_record_ids: decision === 'grant' ? selectedRecordIds : [],
     };
 
-    const result = await submitConsent(requestId, payload);
+    const result = await submitConsent(requestId, payload, isDemoMode);
     setIsSubmitting(false);
 
     if (result.error || !result.data) {
@@ -290,10 +292,10 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
         </View>
 
         {/* Development Fixture Notice */}
-        {isFixtureUsed && (
+        {!isDemoMode && isFixtureUsed && (
           <View style={styles.fixtureNotice}>
             <Text style={styles.fixtureNoticeText}>
-              DEVELOPMENT FIXTURE ACTIVE: Live /requests/{requestId}/consent endpoint not yet deployed.
+              OFFLINE MODE: Displaying local simulated authorization for UI verification.
             </Text>
           </View>
         )}

@@ -27,8 +27,10 @@ import {
 } from 'react-native';
 import { AiIntentResponse, ApiError } from '@lifepass/shared';
 import { interpretTaskIntent } from '../services/aiRequirementService';
+import { useAuth } from '../context/AuthContext';
 
 interface AiTaskEntryScreenProps {
+  initialGoal?: string;
   onTaskInterpreted: (result: AiIntentResponse, originalGoal: string) => void;
   onBackToHome: () => void;
 }
@@ -40,10 +42,12 @@ const EXAMPLE_GOALS = [
 ];
 
 export const AiTaskEntryScreen: React.FC<AiTaskEntryScreenProps> = ({
+  initialGoal,
   onTaskInterpreted,
   onBackToHome,
 }) => {
-  const [goalText, setGoalText] = useState('');
+  const { isDemoMode } = useAuth();
+  const [goalText, setGoalText] = useState(initialGoal || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [isFixtureUsed, setIsFixtureUsed] = useState(false);
@@ -61,7 +65,7 @@ export const AiTaskEntryScreen: React.FC<AiTaskEntryScreenProps> = ({
     setIsLoading(true);
     setError(null);
 
-    const result = await interpretTaskIntent(text);
+    const result = await interpretTaskIntent(text, isDemoMode);
     setIsLoading(false);
     setIsFixtureUsed(result.isDevFixture);
 
@@ -136,10 +140,10 @@ export const AiTaskEntryScreen: React.FC<AiTaskEntryScreenProps> = ({
           )}
 
           {/* Development Fixture Badge Notice */}
-          {isFixtureUsed && (
+          {!isDemoMode && isFixtureUsed && (
             <View style={styles.fixtureNotice}>
               <Text style={styles.fixtureNoticeText}>
-                DEVELOPMENT FIXTURE ACTIVE: Live /ai/intent endpoint not yet deployed by backend workstream.
+                OFFLINE MODE: Displaying local requirement fixtures for preview.
               </Text>
             </View>
           )}
